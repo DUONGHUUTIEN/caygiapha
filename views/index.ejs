@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cây Gia Phả</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+        }
+        nav ul li {
+            padding: 10px 20px;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+        .user-profile {
+            font-size: 16px;
+            color: #333;
+        }
+        main {
+            margin-top: 60px;
+            padding: 20px;
+        }
+        section {
+            margin-bottom: 40px;
+        }
+        .features {
+            display: flex;
+            justify-content: space-between;
+        }
+        .feature {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .statistics {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .stat {
+            flex: 1;
+            min-width: 150px;
+            margin: 10px;
+            text-align: center;
+        }
+        .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .description {
+            font-size: 16px;
+            color: #333;
+        }
+        footer {
+            background-color: #f8f9fa;
+            padding: 40px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 40px;
+        }
+        .footer-column {
+            flex: 1;
+            min-width: 200px;
+            margin: 10px;
+        }
+        .footer-column h4 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .footer-column p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .footer-column a {
+            display: block;
+            font-size: 14px;
+            color: #007bff;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+        .footer-column a:hover {
+            text-decoration: underline;
+        }
+        .footer-social {
+            display: flex;
+            gap: 10px;
+        }
+        .footer-social a {
+            font-size: 16px;
+            color: #333;
+            text-decoration: none;
+        }
+        .footer-social a:hover {
+            color: #007bff;
+        }
+        @media (max-width: 768px) {
+            .features {
+                flex-direction: column;
+            }
+            .feature {
+                margin: 10px 0;
+            }
+            footer {
+                flex-direction: column;
+                align-items: center;
+            }
+            .footer-column {
+                margin: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="/logo.png" alt="Logo">
+            Cây Gia Phả
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/">Trang Chủ</a></li>
+                <li><a href="/tree">Cây Gia Phả</a></li>
+                <li><a href="#">Thành Viên</a></li>
+                <li><a href="#">Sự Kiện</a></li>
+                <li><a href="#">Liên Hệ</a></li>
+            </ul>
+        </nav>
+        <div class="user-profile"></div>
+    </header>
+    <main>
+        <section>
+            <h1>Khám Phá Cây Gia Phả Của Gia Đình Bạn</h1>
+            <p>Kết nối với tổ tiên, lưu giữ lịch sử gia đình và xây dựng di sản cho thế hệ tương lai.</p>
+            <button>Bắt Đầu Ngay</button>
+            <button>Xem Demo</button>
+        </section>
+        <section>
+            <h2>Tính Năng Nổi Bật</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>Dễ Dàng Sử Dụng</h3>
+                    <p>Giao diện thân thiện, dễ sử dụng cho mọi lứa tuổi. Thêm thành viên và thông tin chỉ với vài cú click.</p>
+                </div>
+                <div class="feature">
+                    <h3>Lưu Trữ An Toàn</h3>
+                    <p>Dữ liệu được bảo mật tuyệt đối với công nghệ mã hóa hiện đại. Thông tin gia đình luôn được an toàn.</p>
+                </div>
+                <div class="feature">
+                    <h3>Chia Sẻ Gia Đình</h3>
+                    <p>Mời thành viên gia đình cùng tham gia, cập nhật thông tin và chia sẻ kỷ niệm đáng nhớ.</p>
+                </div>
+            </div>
+        </section>
+        <section>
+            <h2>Thống Kê</h2>
+            <div class="statistics">
+                <div class="stat">
+                    <div class="number">10,000+</div>
+                    <div class="description">Gia Đình Tin Tưởng</div>
+                </div>
+                <div class="stat">
+                    <div class="number">500,000+</div>
+                    <div class="description">Thành Viên</div>
+                </div>
+                <div class="stat">
+                    <div class="number">15+</div>
+                    <div class="description">Thế Hệ Lưu Trữ</div>
+                </div>
+                <div class="stat">
+                    <div class="number">99.9%</div>
+                    <div class="description">Độ Tin Cậy</div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-column">
+            <h4>Cây Gia Phả</h4>
+            <p>Kết nối gia đình, lưu giữ truyền thống và xây dựng tương lai cùng nhau.</p>
+        </div>
+        <div class="footer-column">
+            <h4>Sản Phẩm</h4>
+            <a href="#">Cây Gia Phả</a>
+            <a href="#">Quản Lý Thành Viên</a>
+            <a href="#">Lưu Trữ Ảnh</a>
+            <a href="#">Sự Kiện Gia Đình</a>
+        </div>
+        <div class="footer-column">
+            <h4>Hỗ Trợ</h4>
+            <a href="#">Trung Tâm Trợ Giúp</a>
+            <a href="#">Hướng Dẫn</a>
+            <a href="#">Liên Hệ</a>
+            <a href="#">FAQ</a>
+        </div>
+        <div class="footer-column">
+            <h4>Theo Dõi</h4>
+            <div class="footer-social">
+                <a href="#">FB</a>
+                <a href="#">IG</a>
+                <a href="#">YT</a>
+            </div>
+        </div>
+        <div style="width: 100%; text-align: center; margin-top: 20px;">
+            <p>&copy; 2024 Cây Gia Phả. Tất cả quyền được bảo lưu.</p>
+        </div>
+    </footer>
+    <script>
+        document.querySelector('button:nth-of-type(1)').addEventListener('click', () => {
+            const isLoggedIn = false; // Replace with actual login check
+            if (isLoggedIn) {
+                window.location.href = '/create-tree';
+            } else {
+                window.location.href = '/register';
+            }
+        });
+
+        document.querySelector('button:nth-of-type(2)').addEventListener('click', () => {
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            modal.style.color = '#fff';
+            modal.style.display = 'flex';
+            modal.style.flexDirection = 'column';
+            modal.style.justifyContent = 'center';
+            modal.style.alignItems = 'center';
+            modal.innerHTML = `
+                <h2>Cây Gia Phả Mẫu</h2>
+                <p>Gia đình Nguyễn - 3 thế hệ</p>
+                <button onclick="window.location.href='/create-tree'">Tạo Cây Gia Phả Của Bạn</button>
+                <button onclick="document.body.removeChild(modal)">Đóng</button>
+            `;
+            document.body.appendChild(modal);
+        });
+
+        const userLoggedIn = false; // Replace with actual login check
+        const userProfileDiv = document.querySelector('.user-profile');
+
+        if (userLoggedIn) {
+            userProfileDiv.innerHTML = '<span>Nguyễn Văn A</span>'; // Replace with dynamic user name
+        } else {
+            userProfileDiv.innerHTML = `
+                <button onclick="window.location.href='/login'">Đăng Nhập</button>
+                <button onclick="window.location.href='/register'">Đăng Ký</button>
+            `;
+        }
+
+        document.querySelector('.user-profile').addEventListener('click', (event) => {
+            if (event.target.textContent === 'Đăng Nhập') {
+                const loginModal = document.createElement('div');
+                loginModal.style.position = 'fixed';
+                loginModal.style.top = '0';
+                loginModal.style.left = '0';
+                loginModal.style.width = '100%';
+                loginModal.style.height = '100%';
+                loginModal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                loginModal.style.color = '#fff';
+                loginModal.style.display = 'flex';
+                loginModal.style.flexDirection = 'column';
+                loginModal.style.justifyContent = 'center';
+                loginModal.style.alignItems = 'center';
+                loginModal.innerHTML = `
+                    <h2>Đăng Nhập</h2>
+                    <form>
+                        <input type="text" placeholder="Tên đăng nhập" required><br>
+                        <input type="password" placeholder="Mật khẩu" required><br>
+                        <button type="submit">Đăng Nhập</button>
+                        <button type="button" onclick="document.body.removeChild(loginModal)">Đóng</button>
+                    </form>
+                `;
+                document.body.appendChild(loginModal);
+            } else if (event.target.textContent === 'Đăng Ký') {
+                const registerModal = document.createElement('div');
+                registerModal.style.position = 'fixed';
+                registerModal.style.top = '0';
+                registerModal.style.left = '0';
+                registerModal.style.width = '100%';
+                registerModal.style.height = '100%';
+                registerModal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                registerModal.style.color = '#fff';
+                registerModal.style.display = 'flex';
+                registerModal.style.flexDirection = 'column';
+                registerModal.style.justifyContent = 'center';
+                registerModal.style.alignItems = 'center';
+                registerModal.innerHTML = `
+                    <h2>Đăng Ký</h2>
+                    <form>
+                        <input type="text" placeholder="Tên đăng nhập" required><br>
+                        <input type="email" placeholder="Email" required><br>
+                        <input type="password" placeholder="Mật khẩu" required><br>
+                        <button type="submit">Đăng Ký</button>
+                        <button type="button" onclick="document.body.removeChild(registerModal)">Đóng</button>
+                    </form>
+                `;
+                document.body.appendChild(registerModal);
+            }
+        });
+    </script>
+</body>
+</html>
