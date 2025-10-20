@@ -63,13 +63,13 @@
     <div class="register-form">
         <img src="/user-icon.png" alt="User Icon">
         <h1>Đăng Ký</h1>
-        <form>
-            <input type="text" placeholder="Họ và tên" required>
-            <input type="email" placeholder="Email" required>
-            <input type="password" placeholder="Mật khẩu" required>
-            <input type="password" placeholder="Xác nhận mật khẩu" required>
+        <form action="/register" method="POST">
+            <input type="text" name="name" placeholder="Họ và tên" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+            <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
             <div>
-                <input type="checkbox" id="terms">
+                <input type="checkbox" id="terms" name="terms" required>
                 <label for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a></label>
             </div>
             <button type="submit">Đăng Ký</button>

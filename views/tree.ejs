@@ -3,10 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Tree Visualization</title>
+    <title>Family Tree</title>
+    <style>
+        :root{
+            --card-bg: #fff7ef;
+            --card-border: #c49a6c;
+            --accent: #c49a6c;
+        }
+        body { font-family: Arial, sans-serif; padding: 24px; background: linear-gradient(#fff,#fffaf0); }
+        h1 { text-align:center; color: var(--accent); margin-bottom: 18px; }
+        #tree-root { display:flex; justify-content:center; }
+        ul.tree { list-style:none; padding:0; margin:0; }
+        ul.tree li { position: relative; display:flex; flex-direction:column; align-items:center; }
+        .card-row { display:flex; align-items:flex-start; gap:18px; }
+        .node-card, .spouse-card { width:220px; border:2px solid var(--card-border); border-radius:8px; padding:12px; background:var(--card-bg); box-shadow:0 2px 8px rgba(0,0,0,0.06); text-align:center; }
+        .node-avatar, .sp-avatar{ width:56px; height:56px; border-radius:50%; background:#ffd59e; margin:0 auto 8px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+        .btn-row{ display:flex; gap:6px; justify-content:center; margin-top:8px; }
+        .btn-row button{ padding:6px 8px; border-radius:6px; border:1px solid #ddd; background:white; cursor:pointer; }
+
+        /* vertical connector from a node to its children block */
+        .v-connector { width:2px; background:var(--accent); height:18px; margin-top:8px; }
+
+        /* horizontal connector between spouse cards */
+        .h-connector { height:2px; background:var(--accent); align-self:center; width:18px; margin-top:36px; }
+
+        /* children container laid out horizontally */
+        .children { display:flex; gap:28px; margin-top:18px; }
+
+        .edit-input{ width:160px; }
+    </style>
 </head>
 <body>
-    <h1>Family Tree</h1>
-    <p>This is where the family tree visualization will appear.</p>
+    <h1>SƠ ĐỒ CÂY GIA PHẢ</h1>
+    <div id="tree-root">Loading...</div>
+
+    <script>
+        async function fetchTree(){
+            const res = await fetch('/api/tree/data');
+            return res.json();
+        }
+
+        function createCard(node, path, isSpouse=false){
+            const card = document.createElement('div');
+            card.className = isSpouse ? 'spouse-card' : 'node-card';
+
+            const avatar = document.createElement('div');
+            avatar.className = isSpouse ? 'sp-avatar' : 'node-avatar';
+            avatar.textContent = (isSpouse ? (node.name ? node.name.charAt(0) : '') : (node.name ? node.name.charAt(0) : ''));
+            card.appendChild(avatar);
+
+            const nameEl = document.createElement('div');
+            nameEl.style.fontWeight = '700';
+            nameEl.textContent = isSpouse ? node.name : node.name;
+            card.appendChild(nameEl);
+
+            const btnRow = document.createElement('div');
+            btnRow.className = 'btn-row';
+
+            const editBtn = document.createElement('button'); editBtn.textContent='✏️'; editBtn.title='Edit';
+            editBtn.onclick = () => startEdit(card, node, path, isSpouse ? 'spouse' : 'self');
+            btnRow.appendChild(editBtn);
+
+            if(!isSpouse){
+                const addChild = document.createElement('button'); addChild.textContent='➕'; addChild.title='Add child'; addChild.onclick = () => startAdd(card, path, 'child'); btnRow.appendChild(addChild);
+                const addSpouse = document.createElement('button'); addSpouse.textContent='💑'; addSpouse.title='Add spouse'; addSpouse.onclick = () => startAdd(card, path, 'spouse'); btnRow.appendChild(addSpouse);
+                const addParent = document.createElement('button'); addParent.textContent='⬆️'; addParent.title='Add parent'; addParent.onclick = () => startAdd(card, path, 'parent'); btnRow.appendChild(addParent);
+            } else {
+                const delSp = document.createElement('button'); delSp.textContent='🗑️'; delSp.title='Remove spouse'; delSp.onclick = () => deleteNode(path, 'spouse'); btnRow.appendChild(delSp);
+            }
+
+            if(!isSpouse){ const delBtn = document.createElement('button'); delBtn.textContent='🗑️'; delBtn.title='Delete'; delBtn.onclick = () => deleteNode(path,'self'); btnRow.appendChild(delBtn); }
+
+            card.appendChild(btnRow);
+            return card;
+        }
+
+        function createNodeElement(node, path){
+            const li = document.createElement('li');
+
+            const row = document.createElement('div');
+            row.className = 'card-row';
+            row.style.position='relative';
+
+            // main card
+            const mainCard = createCard(node, path, false);
+            row.appendChild(mainCard);
+
+            // spouse side-by-side with a small connector
+            if(node.spouse){
+                const hconn = document.createElement('div'); hconn.className='h-connector';
+                // place connector between cards
+                row.appendChild(hconn);
+                const spCard = createCard(node.spouse, path, true);
+                row.appendChild(spCard);
+            }
+
+            li.appendChild(row);
+
+            // vertical connector to children
+            if(node.children && node.children.length>0){
+                const v = document.createElement('div'); v.className='v-connector'; li.appendChild(v);
+                const childrenWrap = document.createElement('div'); childrenWrap.className='children';
+                node.children.forEach((child, idx)=>{
+                    const childNode = createNodeElement(child, path.concat(idx));
+                    childrenWrap.appendChild(childNode);
+                });
+                li.appendChild(childrenWrap);
+            }
+
+            return li;
+        }
+
+        function renderTree(tree){
+            const root = document.getElementById('tree-root');
+            root.innerHTML='';
+            const ul = document.createElement('ul'); ul.className='tree';
+            ul.appendChild(createNodeElement(tree, []));
+            root.appendChild(ul);
+        }
+
+        function startEdit(cardEl, node, path, relation='self'){
+            const input = document.createElement('input'); input.className='edit-input';
+            input.value = relation==='spouse' ? (node.spouse?node.spouse.name:'') : node.name;
+            const save = document.createElement('button'); save.textContent='Save'; save.onclick = async ()=>{
+                await fetch('/api/tree/update',{ method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ path, name: input.value, relation: relation==='spouse'?'spouse':'self' }) });
+                loadAndRender();
+            };
+            const cancel = document.createElement('button'); cancel.textContent='Cancel'; cancel.onclick = loadAndRender;
+            cardEl.innerHTML=''; cardEl.appendChild(input); cardEl.appendChild(save); cardEl.appendChild(cancel);
+        }
+
+        function startAdd(cardEl, path, relation='child'){
+            const input = document.createElement('input'); input.className='edit-input'; input.placeholder = relation==='spouse'?'Spouse name': relation==='parent'?'Parent name':'Child name';
+            const add = document.createElement('button'); add.textContent='Add'; add.onclick = async ()=>{
+                const name = input.value.trim(); if(!name) return alert('Enter a name');
+                const payload = { path, node:{ name } }; if(relation && relation!=='child') payload.relation = relation;
+                await fetch('/api/tree/add',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+                loadAndRender();
+            };
+            const cancel = document.createElement('button'); cancel.textContent='Cancel'; cancel.onclick = loadAndRender;
+            cardEl.innerHTML=''; cardEl.appendChild(input); cardEl.appendChild(add); cardEl.appendChild(cancel);
+        }
+
+        async function deleteNode(path, relation='self'){
+            if(relation==='spouse'){ if(!confirm('Delete spouse?')) return; } else { if(!confirm('Delete this node and all children?')) return; }
+            const payload = { path }; if(relation && relation!=='self') payload.relation = relation;
+            await fetch('/api/tree/delete',{ method:'DELETE', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+            loadAndRender();
+        }
+
+        async function loadAndRender(){ const tree = await fetchTree(); renderTree(tree); }
+        loadAndRender();
+    </script>
 </body>
 </html>

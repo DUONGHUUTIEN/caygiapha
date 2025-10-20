@@ -1,0 +1,46 @@
+<!-- Partial: auth-modal.ejs -->
+<!-- Includes both login and register modals -->
+<div id="loginModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+        <div class="brand-inline">
+            <img src="/images/logo_caygiapha.jpg" alt="Logo" class="logo-img">
+            <div class="brand-text">Cây Gia Phả</div>
+        </div>
+        <h1>Đăng Nhập</h1>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+            <div class="checkbox-container">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Ghi nhớ đăng nhập</label>
+            </div>
+            <button type="submit">Đăng Nhập</button>
+        </form>
+        <p style="text-align: right;"><a href="#" onclick="forgotPassword()">Quên mật khẩu?</a></p>
+        <p>Chưa có tài khoản? <a href="#" onclick="showModal('registerModal'); closeModal('loginModal')">Đăng ký ngay</a></p>
+    </div>
+</div>
+
+<div id="registerModal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+        <div class="brand-inline">
+            <img src="/images/logo_caygiapha.jpg" alt="Logo" class="logo-img">
+            <div class="brand-text">Cây Gia Phả</div>
+        </div>
+        <h1>Đăng Ký</h1>
+        <form id="registerForm" onsubmit="handleRegister(event)">
+            <input type="text" name="name" placeholder="Họ và tên" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+            <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+            <div class="checkbox-container">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a></label>
+            </div>
+            <button type="submit">Đăng Ký</button>
+        </form>
+        <p>Đã có tài khoản? <a href="#" onclick="showModal('loginModal'); closeModal('registerModal')">Đăng nhập</a></p>
+    </div>
+</div>

@@ -1,0 +1,46 @@
+{
+  "name": "John Doe",
+  "children": [
+    {
+      "name": "Jane Doe",
+      "children": [
+        {
+          "name": "Alice Doe",
+          "children": []
+        },
+        {
+          "name": "Bob Doe",
+          "children": []
+        }
+      ],
+      "spouse": {
+        "name": "vo john"
+      }
+    },
+    {
+      "name": "hoa",
+      "children": [
+        {
+          "name": "tien",
+          "children": [
+            {
+              "name": "duc",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "hung",
+          "children": []
+        }
+      ],
+      "spouse": {
+        "name": "vo hoa"
+      }
+    },
+    {
+      "name": "hung",
+      "children": []
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cây Gia Phả</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/auth-modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ... (các style khác) ... */
+    </style>
+</head>
+<body>
+    <!-- ... (phần header và main content) ... -->
+
+    <!-- Modal Đăng Nhập -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('loginModal')">&times;</span>
+            <a href="/" class="logo-link">
+                <img src="/images/logo.jpg" alt="Logo Cây Gia Phả" class="logo-img">
+                <h1>Đăng Nhập</h1>
+            </a>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mật khẩu" required>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Ghi nhớ đăng nhập</label>
+                </div>
+                <button type="submit">Đăng Nhập</button>
+            </form>
+            <p style="text-align: right;">
+                <a href="#" onclick="forgotPassword()">Quên mật khẩu?</a>
+            </p>
+            <p>
+                Chưa có tài khoản? 
+                <a href="#" onclick="showModal('registerModal'); closeModal('loginModal')">Đăng ký ngay</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Modal Đăng Ký -->
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('registerModal')">&times;</span>
+            <a href="/" class="logo-link">
+                <img src="/images/logo.jpg" alt="Logo Cây Gia Phả" class="logo-img">
+                <h1>Đăng Ký</h1>
+            </a>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <input type="text" name="name" placeholder="Họ và tên" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mật khẩu" required>
+                <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a></label>
+                </div>
+                <button type="submit">Đăng Ký</button>
+            </form>
+            <p>
+                Đã có tài khoản? 
+                <a href="#" onclick="showModal('loginModal'); closeModal('registerModal')">Đăng nhập</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ... (phần script) ... -->
+</body>
+</html>

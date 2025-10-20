@@ -1,0 +1,174 @@
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.7);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    display: flex;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 24px;
+    color: #666;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.modal-close:hover {
+    color: #000;
+    background-color: #f0f0f0;
+}
+
+.modal-content .logo-link {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 20px;
+}
+
+.modal-content .logo-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.modal-content .brand-inline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.modal-content .brand-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+.modal-content h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 10px 0 20px;
+}
+
+.modal-content form {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="password"] {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.modal-content button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.modal-content .checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.modal-content .checkbox-container input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.modal-content a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.modal-content a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.modal-content p {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}

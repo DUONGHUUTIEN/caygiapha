@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thành viên - Cây gia phả</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#f7f9fb}
+    .panel{background:#fff;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    label{font-size:13px;color:#333}
+    input,select,textarea{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px}
+    .btn{padding:10px 14px;border-radius:6px;border:none;cursor:pointer}
+  .btn-primary{background:#16a34a;color:#fff}
+  .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .card{background:#fff;padding:12px;border-radius:8px;border:1px solid #eef2f7}
+    .card h4{margin:0 0 6px}
+    .card .meta{font-size:12px;color:#666}
+    .actions{display:flex;gap:8px;margin-top:8px}
+    .action-link{color:#2563eb;cursor:pointer}
+    /* modal simple */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)}
+    .modal .dialog{background:#fff;padding:16px;border-radius:10px;width:720px}
+    .modal.show{display:flex}
+  </style>
+</head>
+<body>
+  <h2>Quản lý thành viên</h2>
+  <div class="panel">
+    <div style="display:flex;gap:12px;align-items:end;">
+      <div style="flex:1">
+        <label>Tên thành viên</label>
+        <input id="q-name" placeholder="Nhập tên cần tìm" />
+      </div>
+      <div style="width:120px">
+        <label>Thế hệ</label>
+        <select id="q-gen"><option value="">Tất cả</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+      </div>
+      <div style="width:140px">
+        <label>Giới tính</label>
+        <select id="q-gender"><option value="">Tất cả</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="btn-search">Tìm kiếm</button>
+        <button class="btn btn-muted" id="btn-reset">Đặt lại</button>
+      </div>
+      <div style="margin-left:auto">
+        <button class="btn btn-primary" id="btn-add">Thêm thành viên mới</button>
+      </div>
+    </div>
+
+    <div id="results" class="result-grid"></div>
+
+  </div>
+
+  <!-- add/edit modal -->
+  <div id="modal" class="modal">
+    <div class="dialog">
+      <h3 id="modal-title">Thêm thành viên mới</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <label>Họ và tên *</label>
+          <input id="m-name" />
+        </div>
+        <div>
+          <label>Giới tính</label>
+          <select id="m-gender"><option value="">Chọn</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
+        </div>
+        <div>
+          <label>Ngày sinh</label>
+          <input id="m-dob" type="date" />
+        </div>
+        <div>
+          <label>Nơi sinh</label>
+          <input id="m-bp" />
+        </div>
+        <div>
+          <label>Cha (chọn)</label>
+          <select id="m-father"><option value="">Chọn cha</option></select>
+        </div>
+        <div>
+          <label>Mẹ (chọn)</label>
+          <select id="m-mother"><option value="">Chọn mẹ</option></select>
+        </div>
+        <div style="grid-column:1/3">
+          <label>Nghề nghiệp</label>
+          <input id="m-job" />
+        </div>
+        <div style="grid-column:1/3">
+          <label>Ghi chú</label>
+          <textarea id="m-notes"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button class="btn btn-muted" id="modal-cancel">Hủy bỏ</button>
+        <button class="btn btn-primary" id="modal-save">Thêm thành viên</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- delete confirm modal -->
+  <div id="modal-del" class="modal"><div class="dialog"><h3>Xác nhận xóa</h3><div id="del-body"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="btn btn-muted" id="del-cancel">Hủy</button><button class="btn btn-primary" id="del-confirm">Xác nhận xóa</button></div></div></div>
+
+  <!-- member detail modal -->
+  <div id="modal-detail" class="modal">
+    <div class="dialog" style="width:820px;max-width:95vw">
+      <h3>Thông tin chi tiết thành viên <span id="detail-name"></span></h3>
+      <div id="detail-body" style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:0 0 200px;text-align:center">
+          <div style="width:140px;height:140px;border-radius:50%;background:#eef2f7;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:48px">👤</div>
+          <div id="detail-id" style="margin-top:8px;color:#666"></div>
+          <div style="margin-top:10px"><button class="btn btn-primary" id="detail-edit">Chỉnh sửa</button> <button class="btn" id="detail-delete" style="background:#ff4d4f;color:#fff">Xóa</button></div>
+        </div>
+        <div style="flex:1">
+          <div id="detail-personal" style="background:#fafafa;padding:12px;border-radius:8px;margin-bottom:8px"></div>
+          <div id="detail-family" style="background:#fafafa;padding:12px;border-radius:8px"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="btn btn-muted" onclick="document.getElementById('modal-detail').classList.remove('show')">Đóng</button></div>
+    </div>
+  </div>
+
+  <script>
+    let members = [];
+    let editing = null; // { path, relation }
+
+    // Load the flat list from API
+    async function loadMembers(){
+      const res = await fetch('/api/members/list');
+      if(!res.ok) return alert('Lỗi tải dữ liệu thành viên');
+      members = await res.json();
+      renderResults(members);
+      populateParentSelects(members);
+    }
+
+    function renderResults(list){
+      const el = document.getElementById('results'); el.innerHTML='';
+      if(!list || !list.length){ el.innerHTML='<div style="grid-column:1/4;color:#666;padding:12px">Không có kết quả</div>'; return; }
+      list.forEach(m=>{
+        const c = document.createElement('div'); c.className='card';
+        const h = document.createElement('h4'); h.textContent = m.name || '(không tên)'; c.appendChild(h);
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `Thế hệ ${m.generation} · Con: ${m.childrenCount || 0}`; c.appendChild(meta);
+        const actions = document.createElement('div'); actions.className='actions';
+  const view = document.createElement('span'); view.className='action-link'; view.textContent='Xem'; view.onclick=()=> openInTree(m.path);
+  const detail = document.createElement('span'); detail.className='action-link'; detail.textContent='Chi tiết'; detail.onclick = () => openDetail(m.path);
+        const edit = document.createElement('span'); edit.className='action-link'; edit.textContent='Sửa'; edit.onclick=()=> openEditModal(m.path);
+        const del = document.createElement('span'); del.className='action-link'; del.style.color='red'; del.textContent='Xóa'; del.onclick=()=> openDelete(m.path);
+  actions.appendChild(view); actions.appendChild(detail); actions.appendChild(edit); actions.appendChild(del);
+        c.appendChild(actions);
+        el.appendChild(c);
+      });
+    }
+
+    function populateParentSelects(list){
+      const father = document.getElementById('m-father'); const mother = document.getElementById('m-mother');
+      father.innerHTML='<option value="">Chọn cha</option>'; mother.innerHTML='<option value="">Chọn mẹ</option>';
+      list.forEach((m)=>{
+        const opt = document.createElement('option'); opt.value = JSON.stringify(m.path); opt.textContent = m.name + ' (Thế hệ ' + m.generation + ')';
+        father.appendChild(opt.cloneNode(true)); mother.appendChild(opt.cloneNode(true));
+      });
+    }
+
+    function openInTree(path){
+      // attempt to open /tree and highlight via query param if implemented later
+      const q = path && path.length? 'path='+encodeURIComponent(JSON.stringify(path)) : '';
+      window.open('/tree'+(q?('?'+q):''), '_blank');
+    }
+
+    async function openEditModal(path){
+      editing = { path, relation: 'self' };
+      // find node in members list
+      const m = members.find(x=> JSON.stringify(x.path) === JSON.stringify(path));
+      document.getElementById('modal-title').textContent='Chỉnh sửa thành viên';
+      document.getElementById('modal-save').textContent='Cập nhật thông tin';
+      if(m && m.node){
+        document.getElementById('m-name').value = m.node.name || '';
+        document.getElementById('m-gender').value = m.node.gender || '';
+        document.getElementById('m-dob').value = m.node.dob || '';
+        document.getElementById('m-bp').value = m.node.birthplace || '';
+        document.getElementById('m-job').value = m.node.occupation || '';
+        document.getElementById('m-notes').value = m.node.notes || '';
+      } else {
+        document.getElementById('m-name').value = '';
+        document.getElementById('m-gender').value = '';
+        document.getElementById('m-dob').value = '';
+        document.getElementById('m-bp').value = '';
+        document.getElementById('m-job').value = '';
+        document.getElementById('m-notes').value = '';
+      }
+      // try to preselect parent if possible (not strictly accurate for spouse case)
+      document.getElementById('m-father').value = '';
+      document.getElementById('m-mother').value = '';
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function openAddModal(){ editing = null; document.getElementById('modal-title').textContent='Thêm thành viên mới'; document.getElementById('modal-save').textContent='Thêm thành viên'; document.getElementById('m-name').value=''; document.getElementById('m-gender').value=''; document.getElementById('m-dob').value=''; document.getElementById('m-bp').value=''; document.getElementById('m-job').value=''; document.getElementById('m-notes').value=''; document.getElementById('m-father').value=''; document.getElementById('m-mother').value=''; document.getElementById('modal').classList.add('show'); }
+
+    function openDelete(path){ document.getElementById('del-body').innerHTML='<p>Bạn có chắc muốn xóa thành viên?</p>'; document.getElementById('modal-del').classList.add('show'); document.getElementById('del-confirm').onclick = ()=> doDelete(path); }
+
+    async function doDelete(path){
+      const res = await fetch('/api/members', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ path }) });
+      if(!res.ok) return alert('Xóa thất bại');
+      document.getElementById('modal-del').classList.remove('show'); await loadMembers();
+    }
+
+    async function openDetail(path){
+      const params = new URLSearchParams(); params.set('path', JSON.stringify(path));
+      const res = await fetch('/api/members/detail?'+params.toString());
+      if(!res.ok) return alert('Không thể tải chi tiết');
+      const d = await res.json();
+      document.getElementById('detail-name').textContent = d.node.name || '';
+      document.getElementById('detail-id').textContent = d.node.id ? ('ID: '+d.node.id) : '';
+      document.getElementById('detail-personal').innerHTML = `<strong>Thông tin cá nhân</strong><div>Họ và tên: ${d.node.name||''}</div><div>Ngày sinh: ${d.node.dob||''}</div><div>Nơi sinh: ${d.node.birthplace||''}</div><div>Nghề nghiệp: ${d.node.occupation||''}</div>`;
+      let familyHtml = '<strong>Quan hệ gia đình</strong>';
+      if(d.parent) familyHtml += `<div>Cha/Mẹ: ${d.parent.name} <button class="action-link" onclick="openDetail(${JSON.stringify(d.parent.path)})">Xem</button></div>`;
+      if(d.spouse) familyHtml += `<div>Vợ/Chồng: ${d.spouse.name}</div>`;
+      if(d.children && d.children.length) {
+        familyHtml += '<div>Con cái:</div><ul>' + d.children.map(c=>`<li>${c.name} <button class="action-link" onclick='openDetail(${JSON.stringify(c.path)})'>Xem</button></li>`).join('') + '</ul>';
+      }
+      document.getElementById('detail-family').innerHTML = familyHtml;
+      document.getElementById('modal-detail').classList.add('show');
+
+      document.getElementById('detail-edit').onclick = ()=>{ document.getElementById('modal-detail').classList.remove('show'); openEditModal(d.path); };
+      document.getElementById('detail-delete').onclick = ()=>{ document.getElementById('modal-detail').classList.remove('show'); openDelete(d.path); };
+    }
+
+    document.getElementById('btn-add').onclick = openAddModal;
+    document.getElementById('modal-cancel').onclick = ()=> document.getElementById('modal').classList.remove('show');
+    document.getElementById('del-cancel').onclick = ()=> document.getElementById('modal-del').classList.remove('show');
+
+    document.getElementById('modal-save').onclick = async ()=>{
+      const payload = { name: document.getElementById('m-name').value, gender: document.getElementById('m-gender').value, dob: document.getElementById('m-dob').value, birthplace: document.getElementById('m-bp').value, occupation: document.getElementById('m-job').value, notes: document.getElementById('m-notes').value };
+      const parentSel = document.getElementById('m-father').value || document.getElementById('m-mother').value || '';
+      const parentPath = parentSel ? JSON.parse(parentSel) : [];
+      if(editing){
+        const res = await fetch('/api/members', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ path: editing.path, updates: payload }) });
+        if(!res.ok) return alert('Cập nhật thất bại');
+      } else {
+        const res = await fetch('/api/members', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(Object.assign({}, payload, { parentPath })) });
+        if(!res.ok) return alert('Thêm thất bại');
+      }
+      document.getElementById('modal').classList.remove('show'); await loadMembers();
+    };
+
+    document.getElementById('btn-search').onclick = async ()=>{
+      const q = document.getElementById('q-name').value; const gen = document.getElementById('q-gen').value; const gender = document.getElementById('q-gender').value;
+      const params = new URLSearchParams(); if(q) params.set('name', q); if(gen) params.set('gen', gen); if(gender) params.set('gender', gender);
+      const res = await fetch('/api/members/search?'+params.toString()); if(!res.ok) return alert('Lỗi tìm kiếm'); const data = await res.json(); renderResults(data.map(d=>({ name: d.name, generation: d.generation, childrenCount: (d.node && d.node.children)?d.node.children.length:0, path: d.path, node: d.node })));
+    };
+
+    document.getElementById('btn-reset').onclick = ()=>{ document.getElementById('q-name').value=''; document.getElementById('q-gen').value=''; document.getElementById('q-gender').value=''; loadMembers(); };
+
+    loadMembers();
+  </script>
+</body>
+</html>
