@@ -1,0 +1,55 @@
+{
+  "name": "John Doe",
+  "children": [
+    {
+      "name": "Jane Doe",
+      "children": [
+        {
+          "name": "Alice Doe",
+          "children": [],
+          "gender": null,
+          "birthYear": null,
+          "deathYear": null,
+          "description": "",
+          "image": "img_1763476724750.png"
+        },
+        {
+          "name": "Bob Doe",
+          "children": []
+        }
+      ],
+      "gender": "male",
+      "spouse": {
+        "name": "thao",
+        "gender": "female"
+      }
+    },
+    {
+      "name": "hoa",
+      "children": [
+        {
+          "name": "tien",
+          "children": [
+            {
+              "name": "duc",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "hung",
+          "children": []
+        }
+      ],
+      "spouse": {
+        "name": "vo hoa"
+      }
+    },
+    {
+      "name": "hung",
+      "children": []
+    }
+  ],
+  "image": "/images/uploads/img_1763476930223.jpg",
+  "gender": "male"
+}

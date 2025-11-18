@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thêm sự kiện - Cây gia phả</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#f7f9fb}
+    .panel{background:#fff;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);max-width:900px;margin:0 auto}
+    label{font-size:13px;color:#333}
+    input,select,textarea{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:6px;border:none;cursor:pointer}
+    .btn-primary{background:#16a34a;color:#fff}
+    .btn-danger{background:#ef4444;color:#fff}
+    .section{background:#f4f7fb;padding:12px;border-radius:8px;margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <div class="panel" style="display:flex;gap:18px;max-width:1200px">
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="font-size:28px">📅</div>
+        <div>
+          <h2 style="margin:0">Thêm sự kiện mới</h2>
+          <div style="color:#666;font-size:13px">Thêm các sự kiện như sinh nhật, cưới hỏi, giỗ, kỷ niệm...</div>
+        </div>
+      </div>
+
+    <!-- Thông tin cơ bản -->
+    <div class="section" style="background:#eef6ff">
+      <label>Tên sự kiện *</label>
+      <input id="e-title" placeholder="Nhập tên sự kiện" />
+      <div class="row" style="margin-top:8px">
+        <div class="col">
+          <label>Loại sự kiện</label>
+          <select id="e-type"><option value="birthday">Sinh nhật</option><option value="wedding">Cưới</option><option value="memorial">Giỗ</option><option value="anniversary">Kỷ niệm</option><option value="other">Khác</option></select>
+        </div>
+        <div style="width:180px">
+          <label>Mức độ quan trọng</label>
+          <select id="e-importance"><option value="low">Bình thường</option><option value="normal" selected>Quan trọng</option><option value="high">Rất quan trọng</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thời gian & địa điểm -->
+    <div class="section" style="background:#e9fff0">
+      <div class="row">
+        <div style="width:220px">
+          <label>Ngày diễn ra *</label>
+          <input id="e-date" type="date" />
+        </div>
+        <div style="width:160px">
+          <label>Giờ diễn ra</label>
+          <input id="e-time" type="time" />
+        </div>
+        <div class="col">
+          <label>Địa điểm</label>
+          <input id="e-place" placeholder="Nhập địa điểm tổ chức" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Thành viên liên quan -->
+    <div class="section" style="background:#fff7ec">
+      <label>Thành viên liên quan</label>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <div style="flex:1">
+          <label>Thành viên chính</label>
+          <select id="e-main"><option value="">(Chọn thành viên chính)</option></select>
+        </div>
+        <div style="width:220px">
+          <label>Thành viên tham gia</label>
+            <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn" id="add-selected">Thêm</button>
+            <button class="btn" id="remove-selected">Xóa</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <div style="flex:1">
+          <div style="border:1px solid #eee;padding:8px;border-radius:6px;max-height:220px;overflow:auto">
+            <label style="font-weight:bold">Danh sách thành viên</label>
+            <div id="member-list"></div>
+          </div>
+        </div>
+        <div style="width:320px">
+          <div style="border:1px solid #eee;padding:8px;border-radius:6px;min-height:160px">
+            <label style="font-weight:bold">Thành viên tham dự</label>
+            <ul id="selected-list" style="list-style:none;padding-left:0;margin-top:8px"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mô tả & ghi chú -->
+    <div class="section" style="background:#fff">
+      <label>Mô tả chi tiết</label>
+      <textarea id="e-desc" rows="4" placeholder="Mô tả sự kiện, ý nghĩa, người tham gia..."></textarea>
+      <label style="margin-top:8px">Ghi chú thêm</label>
+      <textarea id="e-notes" rows="2" placeholder="Ghi chú..."></textarea>
+    </div>
+
+      <!-- Nhắc nhở & hành động -->
+      <div class="section" style="background:#f8f9fb;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <label style="font-weight:bold">Tùy chọn nhắc nhở</label>
+          <div style="margin-top:8px">
+            <label><input type="checkbox" id="remind-7" /> Nhắc trước 1 tuần</label><br>
+            <label><input type="checkbox" id="remind-1" /> Nhắc trước 1 ngày</label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" id="btn-save">Thêm sự kiện</button>
+          <button class="btn btn-danger" id="btn-cancel">Hủy bỏ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: events list -->
+    <div style="width:420px">
+      <div style="font-weight:600;margin-bottom:8px">Danh sách sự kiện</div>
+      <div style="background:#fff;padding:10px;border-radius:8px;max-height:720px;overflow:auto;border:1px solid #eee" id="events-right">
+        <div id="events-list-loading" style="color:#666">Đang tải...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let membersCache = [];
+
+    async function loadMembersForEvent(){
+      const res = await fetch('/api/members/list');
+      if(!res.ok) return;
+      const ms = await res.json(); membersCache = ms;
+      const main = document.getElementById('e-main'); main.innerHTML = '<option value="">(Chọn thành viên chính)</option>';
+      const memberList = document.getElementById('member-list'); memberList.innerHTML = '';
+      ms.forEach((m,i)=>{
+        const opt = document.createElement('option'); opt.value = JSON.stringify(m.path); opt.textContent = m.name; main.appendChild(opt);
+        const id = 'mcb-'+i;
+        const div = document.createElement('div'); div.style.padding='6px 4px'; div.innerHTML = `<label><input type='checkbox' data-index='${i}' id='${id}' /> ${m.name} <span style='color:#666;font-size:12px'> (Thế hệ ${m.generation})</span></label>`;
+        memberList.appendChild(div);
+      });
+    }
+
+    function getCheckedMemberIndexes(){ return Array.from(document.querySelectorAll('#member-list input[type=checkbox]:checked')).map(i=>Number(i.getAttribute('data-index'))); }
+
+    document.getElementById('add-selected').onclick = ()=>{
+      const idxs = getCheckedMemberIndexes();
+      const list = document.getElementById('selected-list');
+      idxs.forEach(i=>{
+        const m = membersCache[i];
+        // avoid duplicates
+        if(Array.from(list.querySelectorAll('li')).some(li=> li.getAttribute('data-path') === JSON.stringify(m.path))) return;
+        const li = document.createElement('li'); li.setAttribute('data-path', JSON.stringify(m.path)); li.style.padding='6px 4px'; li.textContent = m.name;
+        list.appendChild(li);
+      });
+      // uncheck
+      document.querySelectorAll('#member-list input[type=checkbox]:checked').forEach(cb=> cb.checked=false);
+    };
+
+    document.getElementById('remove-selected').onclick = ()=>{
+      const list = document.getElementById('selected-list');
+      const sel = Array.from(list.querySelectorAll('li.selected'));
+      if(sel.length === 0){ alert('Chọn những thành viên trong khung "Thành viên tham dự" để xóa (click để chọn).'); return; }
+      sel.forEach(li=> li.remove());
+    };
+
+    // click to toggle selection in selected-list
+    document.getElementById('selected-list').addEventListener('click', (e)=>{
+      if(e.target && e.target.tagName === 'LI') e.target.classList.toggle('selected');
+    });
+
+    
+
+    document.getElementById('btn-cancel').onclick = ()=>{ window.history.back(); };
+
+    document.getElementById('btn-save').onclick = async ()=>{
+      const participants = Array.from(document.querySelectorAll('#selected-list li')).map(li=> JSON.parse(li.getAttribute('data-path')));
+      const payload = {
+        title: document.getElementById('e-title').value,
+        type: document.getElementById('e-type').value,
+        importance: document.getElementById('e-importance').value,
+        date: document.getElementById('e-date').value,
+        time: document.getElementById('e-time').value,
+        place: document.getElementById('e-place').value,
+        mainMember: document.getElementById('e-main').value ? JSON.parse(document.getElementById('e-main').value) : null,
+        participants,
+        description: document.getElementById('e-desc').value,
+        notes: document.getElementById('e-notes').value,
+        remind: (document.getElementById('remind-7').checked? '7d,':'') + (document.getElementById('remind-1').checked? '1d':'')
+      };
+      if(!payload.title || !payload.date) return alert('Vui lòng điền Tên và Ngày sự kiện');
+      const res = await fetch('/api/events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  if(!res.ok) return alert('Thêm sự kiện thất bại');
+      // clear form and reload right-hand list
+      alert('Thêm sự kiện thành công');
+      clearForm();
+      await loadEventsRight();
+    };
+
+    loadMembersForEvent();
+    loadEventsRight();
+
+    // --- events list on right column ---
+    async function loadEventsRight(){
+      const wrap = document.getElementById('events-right');
+      const loading = document.getElementById('events-list-loading'); if(loading) loading.style.display='block';
+      const res = await fetch('/api/events/list');
+      if(!res.ok) { wrap.innerHTML = '<div style="color:#c00">Không thể tải danh sách</div>'; return; }
+      const arr = await res.json();
+      if(arr.length === 0) { wrap.innerHTML = '<div style="color:#666">Chưa có sự kiện</div>'; return; }
+      wrap.innerHTML = '';
+      arr.slice().reverse().forEach(ev=>{
+        const d = document.createElement('div'); d.style.padding='8px'; d.style.borderBottom='1px solid #f1f5f9';
+        d.innerHTML = `<div style='font-weight:600'>${escapeHtml(ev.title)}</div><div style='color:#666;font-size:12px'>${ev.date || ''} ${ev.time? '· '+ev.time : ''} · ${ev.place || ''}</div>`;
+        const actions = document.createElement('div'); actions.style.marginTop='6px';
+        const view = document.createElement('button'); view.className='btn btn-muted'; view.textContent='Xem'; view.style.marginRight='6px'; view.onclick = ()=> window.location.href='/events?id='+ev.id;
+        const del = document.createElement('button'); del.className='btn btn-danger'; del.textContent='Xóa'; del.onclick = async ()=>{ if(!confirm('Xác nhận xóa?')) return; const r = await fetch('/api/events/'+ev.id,{method:'DELETE'}); if(!r.ok) return alert('Xóa thất bại'); await loadEventsRight(); };
+        actions.appendChild(view); actions.appendChild(del);
+        d.appendChild(actions);
+        wrap.appendChild(d);
+      });
+    }
+
+    function clearForm(){
+      ['e-title','e-type','e-importance','e-date','e-time','e-place','e-desc','e-notes'].forEach(id=>{ const el = document.getElementById(id); if(!el) return; el.value = '' });
+      // reset selects to first option
+      const main = document.getElementById('e-main'); if(main) main.selectedIndex = 0;
+      // clear selected list
+      const sl = document.getElementById('selected-list'); if(sl) sl.innerHTML='';
+      document.getElementById('remind-7').checked = false; document.getElementById('remind-1').checked = false;
+    }
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+  </script>
+</body>
+</html>

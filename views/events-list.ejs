@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Danh sách sự kiện</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#f7f9fb}
+    .container{max-width:1000px;margin:0 auto}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .card{background:#fff;padding:12px;border-radius:8px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.05);display:flex;justify-content:space-between}
+    .meta{color:#666;font-size:13px}
+    .actions{display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+    .btn-primary{background:#16a34a;color:#fff}
+    .btn-danger{background:#ef4444;color:#fff}
+    .btn-muted{background:#f3f4f6}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <h2>📋 Danh sách sự kiện</h2>
+      <div>
+        <a href="/events"><button class="btn btn-primary">Thêm sự kiện mới</button></a>
+      </div>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <script>
+    async function load(){
+      const res = await fetch('/api/events/list');
+      if(!res.ok) return document.getElementById('list').innerText='Không thể tải dữ liệu';
+      const arr = await res.json();
+      const el = document.getElementById('list'); el.innerHTML='';
+      if(!arr.length) { el.innerHTML='<div style="color:#666">Chưa có sự kiện</div>'; return; }
+      arr.forEach(ev=>{
+        const d = document.createElement('div'); d.className='card';
+        const left = document.createElement('div');
+        left.innerHTML = `<div style="font-weight:600">${ev.title}</div><div class='meta'>${ev.date || ''} ${ev.time ? '· '+ev.time : ''} · ${ev.place || ''}</div>`;
+        const right = document.createElement('div'); right.className='actions';
+        const view = document.createElement('button'); view.className='btn btn-muted'; view.textContent='Xem'; view.onclick = ()=> window.location.href = '/events?id='+ev.id;
+        const del = document.createElement('button'); del.className='btn btn-danger'; del.textContent='Xóa'; del.onclick = async ()=>{
+          if(!confirm('Xác nhận xóa sự kiện này?')) return;
+          const r = await fetch('/api/events/'+ev.id, { method:'DELETE' }); if(!r.ok) return alert('Xóa thất bại'); load();
+        };
+        right.appendChild(view); right.appendChild(del);
+        d.appendChild(left); d.appendChild(right);
+        el.appendChild(d);
+      });
+    }
+    load();
+  </script>
+</body>
+</html>

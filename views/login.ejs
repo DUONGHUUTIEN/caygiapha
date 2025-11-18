@@ -63,11 +63,11 @@
     <div class="login-form">
         <img src="/logo.png" alt="Logo">
         <h1>Đăng Nhập</h1>
-        <form>
-            <input type="email" placeholder="Email" required>
-            <input type="password" placeholder="Mật khẩu" required>
+        <form action="/login" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
             <div>
-                <input type="checkbox" id="remember">
+                <input type="checkbox" id="remember" name="remember">
                 <label for="remember">Ghi nhớ đăng nhập</label>
             </div>
             <button type="submit">Đăng Nhập</button>

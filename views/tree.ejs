@@ -3,10 +3,1373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Tree Visualization</title>
+    <title>Family Tree</title>
+    <style>
+        :root{
+            --card-bg: #fff7ef;
+            --card-border: #c49a6c;
+            --accent: #c49a6c;
+            --male-gradient: linear-gradient(135deg, #6c9fd4, #4a90e2);
+            --female-gradient: linear-gradient(135deg, #f5a6c6, #e91e63);
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 24px; 
+            background: linear-gradient(135deg, #fff 0%, #fffaf0 100%);
+            margin: 0;
+        }
+        
+        h1 { 
+            text-align: center; 
+            color: var(--accent); 
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        #tree-root { 
+            display: flex; 
+            justify-content: center;
+            animation: fadeIn 0.6s ease-in;
+            position: relative; /* for SVG connector overlay */
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        ul.tree { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+        
+        ul.tree li { 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            animation: slideUp 0.5s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-row { 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 18px;
+            position: relative;
+        }
+        
+        .node-card, .spouse-card { 
+            width: 220px; 
+            border: 3px solid var(--card-border); 
+            border-radius: 12px; 
+            padding: 16px; 
+            background: var(--card-bg); 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .node-card:hover, .spouse-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-color: var(--accent);
+        }
+        
+        .node-avatar, .sp-avatar { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #ffd59e, #ffb366);
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 32px;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background-size: cover;
+            background-position: center;
+            object-fit: cover;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .node-avatar.male { background: var(--male-gradient); }
+        .node-avatar.female { background: var(--female-gradient); }
+        .sp-avatar.male { background: var(--male-gradient); }
+        .sp-avatar.female { background: var(--female-gradient); }
+        
+        .node-avatar.with-image,
+        .sp-avatar.with-image {
+            background-size: cover !important;
+            background-position: center !important;
+            font-size: 0;
+        }
+        
+        .avatar-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+        }
+        
+        .role-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #7f53ac, #647dee);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .node-name { 
+            font-weight: 700;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .node-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        
+        .btn-row { 
+            display: flex; 
+            gap: 8px; 
+            justify-content: center; 
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-row button { 
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn-row button:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+        
+        .btn-row button.delete:hover {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        /* vertical connector from a node to its children block */
+        .v-connector { 
+            width: 4px; 
+            background: linear-gradient(180deg, #c49a6c 0%, #d4b8a0 100%);
+            height: 32px; 
+            margin-top: 8px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* horizontal connector between spouse cards */
+        .h-connector { 
+            height: 4px; 
+            background: linear-gradient(90deg, #c49a6c 0%, #d4b8a0 50%, #c49a6c 100%);
+            align-self: center; 
+            width: 28px; 
+            margin-top: 36px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+        }
+
+        /* children container laid out horizontally */
+        .children { 
+            display: flex; 
+            gap: 36px; 
+            margin-top: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Connector lines from parent to children */
+        .children::before {
+            content: '';
+            position: absolute;
+            top: -32px;
+            left: 0;
+            right: 0;
+            height: 32px;
+            background-image: 
+                linear-gradient(to right, transparent calc(50% - 2px), #c49a6c calc(50% - 2px), #c49a6c calc(50% + 2px), transparent calc(50% + 2px));
+            background-size: 100% 4px;
+            background-position: center 0;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+
+        .children li::before {
+            content: '';
+            position: absolute;
+            top: -32px;
+            left: 50%;
+            width: 4px;
+            height: 32px;
+            background: linear-gradient(180deg, transparent 0%, #c49a6c 0%, #c49a6c 100%, transparent 100%);
+            transform: translateX(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+        }
+
+        .edit-input { 
+            width: 160px;
+            padding: 8px;
+            border: 2px solid var(--accent);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+            overflow-y: auto;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+            margin: auto;
+        }
+        
+        .modal-close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-close:hover {
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            margin: 10px auto;
+            border: 3px solid #ddd;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview.has-image {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(196, 154, 108, 0.3);
+        }
+        
+        .upload-section {
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin: 16px 0;
+        }
+
+        .upload-section:hover {
+            border-color: var(--accent);
+            background: #fffbf7;
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #c49a6c, #d4b8a0);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(196, 154, 108, 0.3);
+        }
+
+        .url-option {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .url-option input {
+            flex: 1;
+        }
+
+        .url-option button {
+            padding: 10px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-buttons .btn-save {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .modal-buttons .btn-save:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        
+        .modal-buttons .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .modal-buttons .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            h1 { font-size: 22px; margin-bottom: 20px; }
+            .node-card, .spouse-card { width: 180px; }
+            .node-avatar, .sp-avatar { width: 60px; height: 60px; font-size: 24px; }
+            .children { gap: 16px; }
+            .card-row { gap: 12px; }
+        }
+    </style>
 </head>
 <body>
-    <h1>Family Tree</h1>
-    <p>This is where the family tree visualization will appear.</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+        <h1 style="margin: 0; flex: 1; text-align: left;">🌳 Cây Gia Phả</h1>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm..." style="padding: 8px 12px; border: 2px solid #c49a6c; border-radius: 6px; font-size: 14px;">
+            <select id="filterGeneration" style="padding: 8px 12px; border: 2px solid #c49a6c; border-radius: 6px; font-size: 14px;">
+                <option value="">Tất cả thế hệ</option>
+                <option value="1">Thế hệ 1</option>
+                <option value="2">Thế hệ 2</option>
+                <option value="3">Thế hệ 3</option>
+                <option value="4">Thế hệ 4</option>
+                <option value="5">Thế hệ 5+</option>
+            </select>
+            <button onclick="applySearch()" style="padding: 8px 16px; background: #c49a6c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Lọc</button>
+            <button onclick="clearSearch()" style="padding: 8px 16px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">↺ Xóa</button>
+        </div>
+    </div>
+    <h1>SƠ ĐỒ CÂY GIA PHẢ</h1>
+    
+    <!-- Thống kê gia đình -->
+    <div id="stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; padding: 16px; background: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #007bff;">
+            <div style="font-size: 24px; font-weight: bold; color: #007bff;" id="stat-total">0</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">Tổng thành viên</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #f39c12;">
+            <div style="font-size: 24px; font-weight: bold; color: #f39c12;" id="stat-generations">0</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">Số thế hệ</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #4caf50;">
+            <div style="font-size: 24px; font-weight: bold; color: #4caf50;" id="stat-children">0</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">Con cái</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #e91e63;">
+            <div style="font-size: 24px; font-weight: bold; color: #e91e63;" id="stat-spouse">0</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">Vợ/Chồng</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #9c27b0;">
+            <div style="font-size: 24px; font-weight: bold; color: #9c27b0;" id="stat-male">0</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">👨 Nam</div>
+        </div>
+        <div style="text-align: center; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #ff69b4;">
+            <div style="font-size: 24px; font-weight: bold; color: #ff69b4;" id="stat-female">0</div>
+            <div style="font-size: 12px; color: #666; margin-top: 4px;">👩 Nữ</div>
+        </div>
+    </div>
+
+    <div id="tree-root">Loading...</div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('detailModal')">&times;</span>
+            <h2 id="modalTitle">Thông Tin Thành Viên</h2>
+            <div id="modalBody"></div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal('detailModal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('editModal')">&times;</span>
+            <h2>Chỉnh Sửa Thông Tin</h2>
+            <form id="editForm">
+                <div class="form-group">
+                    <label>Tên</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label>Năm Sinh</label>
+                    <input type="number" id="editBirthYear" min="1900" max="2099">
+                </div>
+                <div class="form-group">
+                    <label>Năm Mất</label>
+                    <input type="number" id="editDeathYear" min="1900" max="2099">
+                </div>
+                <div class="form-group">
+                    <label>Giới Tính</label>
+                    <select id="editGender">
+                        <option value="">Chọn...</option>
+                        <option value="male">Nam</option>
+                        <option value="female">Nữ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mô Tả</label>
+                    <textarea id="editDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ảnh Đại Diện</label>
+                    <div class="upload-section">
+                        <div id="imagePreview" class="image-preview"></div>
+                        <input type="file" id="editImageFile" accept="image/*">
+                        <button type="button" class="upload-btn" onclick="document.getElementById('editImageFile').click()">
+                            📸 Chọn Ảnh
+                        </button>
+                        <p style="font-size: 12px; color: #999; margin: 8px 0;">hoặc</p>
+                    </div>
+                    <label style="margin-top: 12px;">Hoặc Nhập URL Ảnh</label>
+                    <input type="url" id="editImage" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-save">Lưu</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div id="addModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('addModal')">&times;</span>
+            <h2 id="addModalTitle">Thêm Thành Viên Mới</h2>
+            <form id="addForm">
+                <div class="form-group">
+                    <label>Tên</label>
+                    <input type="text" id="addName" required>
+                </div>
+                <div class="form-group">
+                    <label>Năm Sinh</label>
+                    <input type="number" id="addBirthYear" min="1900" max="2099">
+                </div>
+                <div class="form-group">
+                    <label>Giới Tính</label>
+                    <select id="addGender">
+                        <option value="">Chọn...</option>
+                        <option value="male">Nam</option>
+                        <option value="female">Nữ</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-save">Thêm</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentEditPath = null;
+        let currentEditRelation = null;
+        let currentAddPath = null;
+        let currentAddRelation = null;
+
+        // Modal Functions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Detail Modal with enhanced features
+        let detailViewMode = 'profile'; // profile, timeline, statistics
+        let detailSettings = { showAvatar: true, showYears: true, cardSize: 'normal', theme: 'light' };
+        let currentDetailNode = null; // Lưu node hiện tại trong detail modal
+
+        function showDetailModal(node, relation = 'self') {
+            // node is already the correct node, no need to extract spouse again
+            const displayNode = node;
+            if (!displayNode) return;
+
+            // Lưu node hiện tại để dùng cho switch view
+            currentDetailNode = displayNode;
+
+            const modal = document.getElementById('detailModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>${displayNode.name || 'Thông Tin'}</div>
+                    <div style="font-size: 12px; display: flex; gap: 6px;">
+                        <button onclick="switchDetailView('profile')" style="padding: 4px 8px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px;">👤 Hồ sơ</button>
+                        <button onclick="switchDetailView('timeline')" style="padding: 4px 8px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px;">📅 Dòng thời gian</button>
+                        <button onclick="switchDetailView('stats')" style="padding: 4px 8px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px;">📊 Thống kê</button>
+                        <button onclick="openDetailSettings()" style="padding: 4px 8px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 4px;">⚙️</button>
+                    </div>
+                </div>
+            `;
+
+            detailViewMode = 'profile';
+            renderDetailContent(displayNode);
+            openModal('detailModal');
+        }
+
+        function switchDetailView(mode) {
+            detailViewMode = mode;
+            
+            // Re-render with new mode using lưu trữ currentDetailNode
+            const buttons = document.querySelector('#modalTitle').querySelectorAll('button');
+            buttons.forEach(btn => btn.style.background = '#e0e0e0');
+            event.target.style.background = '#c49a6c';
+            
+            renderDetailContent(currentDetailNode);
+        }
+
+        function openDetailSettings() {
+            const settings = prompt('Tùy chọn hiển thị:\n1. Ẩn/Hiện ảnh (hiện: ' + (detailSettings.showAvatar ? 'có' : 'không') + ')\n2. Ẩn/Hiện năm sinh (hiện: ' + (detailSettings.showYears ? 'có' : 'không') + ')\n3. Kích thước card (hiện: ' + detailSettings.cardSize + ')\n4. Theme (hiện: ' + detailSettings.theme + ')', '');
+            if (!settings) return;
+            
+            if (settings === '1') detailSettings.showAvatar = !detailSettings.showAvatar;
+            if (settings === '2') detailSettings.showYears = !detailSettings.showYears;
+            if (settings === '3') detailSettings.cardSize = detailSettings.cardSize === 'normal' ? 'large' : 'normal';
+            if (settings === '4') detailSettings.theme = detailSettings.theme === 'light' ? 'dark' : 'light';
+            
+            renderDetailContent(window.currentDetailNode);
+        }
+
+        function renderDetailContent(displayNode) {
+            // Lưu node hiện tại
+            currentDetailNode = displayNode;
+            const modalBody = document.getElementById('modalBody');
+
+            let birthYear = displayNode.birthYear ? displayNode.birthYear : '';
+            let deathYear = displayNode.deathYear ? displayNode.deathYear : '';
+            let age = '';
+
+            if (birthYear) {
+                if (deathYear) {
+                    age = `${birthYear} - ${deathYear} (${deathYear - birthYear} tuổi)`;
+                } else {
+                    age = `Sinh năm ${birthYear} (${new Date().getFullYear() - birthYear} tuổi)`;
+                }
+            }
+
+            let imageUrl = '';
+            if (displayNode.image) {
+                if (displayNode.image.startsWith('/images/uploads/') || displayNode.image.startsWith('http')) {
+                    imageUrl = displayNode.image;
+                } else {
+                    imageUrl = '/images/uploads/' + displayNode.image;
+                }
+            }
+
+            let html = '';
+
+            if (detailViewMode === 'profile') {
+                html = `
+                    <div style="text-align: center; padding: 20px; background: ${detailSettings.theme === 'dark' ? '#333' : '#fff'}; color: ${detailSettings.theme === 'dark' ? '#fff' : '#000'};">
+                        ${detailSettings.showAvatar ? `
+                            <div style="width: ${detailSettings.cardSize === 'large' ? '150px' : '100px'}; height: ${detailSettings.cardSize === 'large' ? '150px' : '100px'}; margin: 0 auto 16px; border-radius: 50%; 
+                                background: ${displayNode.gender === 'female' ? 'linear-gradient(135deg, #f5a6c6, #e91e63)' : 'linear-gradient(135deg, #6c9fd4, #4a90e2)'};
+                                ${imageUrl ? `background-image: url('${imageUrl}'); background-size: cover;` : ''}
+                                border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+                        ` : ''}
+                        <p style="font-size: 20px; font-weight: bold; margin: 10px 0;">${displayNode.name}</p>
+                        ${detailSettings.showYears && age ? `<p style="color: #666; margin: 5px 0;">${age}</p>` : ''}
+                        ${displayNode.description ? `<p style="color: #666; font-size: 14px; margin: 10px 0;">${displayNode.description}</p>` : ''}
+                    </div>
+                `;
+            } else if (detailViewMode === 'timeline') {
+                html = `
+                    <div style="padding: 20px; background: ${detailSettings.theme === 'dark' ? '#333' : '#fff'}; color: ${detailSettings.theme === 'dark' ? '#fff' : '#000'};">
+                        <h3>📅 Dòng thời gian</h3>
+                        <div style="border-left: 3px solid #c49a6c; padding-left: 16px;">
+                            ${birthYear ? `<div style="margin: 12px 0;">🎂 <strong>Sinh:</strong> ${birthYear}</div>` : ''}
+                            ${deathYear ? `<div style="margin: 12px 0;">🕯️ <strong>Mất:</strong> ${deathYear}</div>` : '<div style="margin: 12px 0;">✓ <strong>Còn sống</strong></div>'}
+                        </div>
+                    </div>
+                `;
+            } else if (detailViewMode === 'stats') {
+                html = `
+                    <div style="padding: 20px; background: ${detailSettings.theme === 'dark' ? '#333' : '#fff'}; color: ${detailSettings.theme === 'dark' ? '#fff' : '#000'};">
+                        <h3>📊 Thống kê</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #4caf50;">👶</div>
+                                <div>Con</div>
+                                <div style="font-size: 18px; font-weight: bold;">0</div>
+                            </div>
+                            <div style="background: #e3f2fd; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #2196f3;">👯</div>
+                                <div>Anh chị em</div>
+                                <div style="font-size: 18px; font-weight: bold;">0</div>
+                            </div>
+                            <div style="background: #fce4ec; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #e91e63;">💑</div>
+                                <div>Vợ/Chồng</div>
+                                <div style="font-size: 18px; font-weight: bold;">0</div>
+                            </div>
+                            <div style="background: #fff3e0; padding: 12px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ff9800;">👨‍👩‍👧‍👦</div>
+                                <div>Thế hệ</div>
+                                <div style="font-size: 18px; font-weight: bold;">1</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = html;
+        }
+
+        // Edit Modal
+        function startEditModal(node, path, relation = 'self') {
+            currentEditPath = path;
+            currentEditRelation = relation;
+
+            // node is already the correct node
+            const displayNode = node;
+            if (!displayNode) return;
+
+            document.getElementById('editName').value = displayNode.name || '';
+            document.getElementById('editBirthYear').value = displayNode.birthYear || '';
+            document.getElementById('editDeathYear').value = displayNode.deathYear || '';
+            document.getElementById('editGender').value = displayNode.gender || '';
+            document.getElementById('editDescription').value = displayNode.description || '';
+            document.getElementById('editImage').value = displayNode.image || '';
+
+            const imagePreview = document.getElementById('imagePreview');
+            if (displayNode.image) {
+                let imageUrl = displayNode.image;
+                if (!imageUrl.startsWith('/images/uploads/') && !imageUrl.startsWith('http')) {
+                    imageUrl = '/images/uploads/' + imageUrl;
+                }
+                imagePreview.style.backgroundImage = `url('${imageUrl}')`;
+                imagePreview.classList.add('has-image');
+            } else {
+                imagePreview.style.backgroundImage = 'none';
+                imagePreview.classList.remove('has-image');
+            }
+
+            // Handle file upload
+            const fileInput = document.getElementById('editImageFile');
+            let uploadedImageData = null;
+
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                        const dataUrl = event.target.result;
+                        // upload to server to persist file
+                        try {
+                            const resp = await fetch('/api/tree/upload', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ dataUrl })
+                            });
+                            const json = await resp.json();
+                            if (resp.ok && json.url) {
+                                uploadedImageData = json.url; // store public URL
+                                imagePreview.style.backgroundImage = `url('${uploadedImageData}')`;
+                                imagePreview.classList.add('has-image');
+                            } else {
+                                // fallback to local preview
+                                uploadedImageData = dataUrl;
+                                imagePreview.style.backgroundImage = `url('${uploadedImageData}')`;
+                                imagePreview.classList.add('has-image');
+                                console.error('Upload failed', json);
+                            }
+                        } catch (err) {
+                            uploadedImageData = dataUrl;
+                            imagePreview.style.backgroundImage = `url('${uploadedImageData}')`;
+                            imagePreview.classList.add('has-image');
+                            console.error('Upload error', err);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            // Handle URL preview
+            const urlInput = document.getElementById('editImage');
+            urlInput.addEventListener('input', (e) => {
+                if (e.target.value) {
+                    imagePreview.style.backgroundImage = `url('${e.target.value}')`;
+                    imagePreview.classList.add('has-image');
+                }
+            });
+
+            document.getElementById('editForm').onsubmit = async (e) => {
+                e.preventDefault();
+                // Normalize values
+                const name = document.getElementById('editName').value.trim();
+                if (!name) { showNotification('Tên không được để trống', 'error'); return; }
+
+                const by = document.getElementById('editBirthYear').value;
+                const dy = document.getElementById('editDeathYear').value;
+                const parseYear = v => { if (v === null || v === undefined || v === '') return null; const n = parseInt(v); return isNaN(n) ? null : n; };
+
+                const updates = {
+                    name: name,
+                    birthYear: parseYear(by),
+                    deathYear: parseYear(dy),
+                    gender: document.getElementById('editGender').value || null,
+                    description: document.getElementById('editDescription').value || null,
+                    image: uploadedImageData || document.getElementById('editImage').value || null
+                };
+
+                try {
+                    const resp = await fetch('/api/tree/update', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ path: currentEditPath, updates, relation: currentEditRelation })
+                    });
+                    const json = await resp.json();
+                    if (!resp.ok) { showNotification(json && json.error ? json.error : 'Cập nhật thất bại', 'error'); return; }
+                    showNotification('Cập nhật thành công', 'success');
+                    closeModal('editModal');
+                    loadAndRender();
+                } catch (err) {
+                    console.error('Update error', err);
+                    showNotification('Lỗi khi cập nhật', 'error');
+                }
+            };
+
+            openModal('editModal');
+        }
+
+        // Add Modal
+        function startAddModal(path, relation = 'child') {
+            currentAddPath = path;
+            currentAddRelation = relation;
+
+            const titleMap = { 'child': 'Thêm Con', 'spouse': 'Thêm Vợ/Chồng', 'parent': 'Thêm Cha/Mẹ' };
+            document.getElementById('addModalTitle').textContent = titleMap[relation] || 'Thêm Thành Viên';
+
+            document.getElementById('addForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('addName').value.trim();
+                if (!name) {
+                    alert('Vui lòng nhập tên');
+                    return;
+                }
+
+                const data = {
+                    path: currentAddPath,
+                    node: {
+                        name: name,
+                        birthYear: document.getElementById('addBirthYear').value || null,
+                        gender: document.getElementById('addGender').value || null
+                    },
+                    relation: relation
+                };
+
+                await fetch('/api/tree/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                closeModal('addModal');
+                loadAndRender();
+            };
+
+            openModal('addModal');
+        }
+
+        // Get initials from name
+        function getInitials(name) {
+            return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '';
+        }
+
+        async function fetchTree() {
+            const res = await fetch('/api/tree/data');
+            return res.json();
+        }
+
+        // Small notification helper
+        function showNotification(msg, type = 'info') {
+            // type: 'info' | 'success' | 'error'
+            let el = document.getElementById('appNotification');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'appNotification';
+                el.style.position = 'fixed';
+                el.style.right = '20px';
+                el.style.top = '80px';
+                el.style.zIndex = 2000;
+                document.body.appendChild(el);
+            }
+            const node = document.createElement('div');
+            node.textContent = msg;
+            node.style.marginBottom = '8px';
+            node.style.padding = '10px 14px';
+            node.style.borderRadius = '8px';
+            node.style.color = '#fff';
+            node.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+            if (type === 'success') node.style.background = '#16a34a';
+            else if (type === 'error') node.style.background = '#ef4444';
+            else node.style.background = '#2563eb';
+            el.appendChild(node);
+            setTimeout(() => { node.style.opacity = '0'; setTimeout(() => node.remove(), 300); }, 3500);
+        }
+
+        function createCard(node, path, isSpouse = false) {
+            const card = document.createElement('div');
+            card.className = isSpouse ? 'spouse-card' : 'node-card';
+
+            // Get display node
+            const displayNode = isSpouse && node.spouse ? node.spouse : node;
+            const parentNode = isSpouse ? node : null; // store parent for spouse edit/view
+
+            // Avatar
+            const avatar = document.createElement('div');
+            avatar.className = isSpouse ? 'sp-avatar' : 'node-avatar';
+
+            if (displayNode.gender === 'female') {
+                avatar.classList.add('female');
+            } else if (displayNode.gender === 'male') {
+                avatar.classList.add('male');
+            }
+
+            // Support storing either a filename (img_xxx.jpg) or a full URL
+            let imageUrl = null;
+            if (displayNode.image) {
+                if (displayNode.image.startsWith('/images/uploads/') || displayNode.image.startsWith('http')) {
+                    imageUrl = displayNode.image;
+                } else {
+                    imageUrl = '/images/uploads/' + displayNode.image;
+                }
+            }
+
+            if (imageUrl) {
+                avatar.classList.add('with-image');
+                avatar.style.backgroundImage = `url('${imageUrl}')`;
+            } else {
+                avatar.textContent = getInitials(displayNode.name);
+            }
+
+            card.appendChild(avatar);
+
+            // Name
+            const nameEl = document.createElement('div');
+            nameEl.className = 'node-name';
+            nameEl.textContent = displayNode.name;
+            card.appendChild(nameEl);
+
+            // Info - Chi tiết tuổi/năm sinh mất
+            const infoEl = document.createElement('div');
+            infoEl.className = 'node-info';
+            let infoText = '';
+            let ageText = '';
+            
+            if (displayNode.birthYear && displayNode.deathYear) {
+                infoText = `${displayNode.birthYear} - ${displayNode.deathYear}`;
+                ageText = `(${displayNode.deathYear - displayNode.birthYear} tuổi)`;
+            } else if (displayNode.birthYear) {
+                const age = new Date().getFullYear() - displayNode.birthYear;
+                infoText = `Sinh: ${displayNode.birthYear}`;
+                ageText = `(${age} tuổi)`;
+            }
+            
+            infoEl.innerHTML = `<div>${infoText}</div>${ageText ? `<div style="font-size: 11px; color: #999;">${ageText}</div>` : ''}`;
+            card.appendChild(infoEl);
+
+            // Buttons
+            const btnRow = document.createElement('div');
+            btnRow.className = 'btn-row';
+
+            // View Detail Button
+            const detailBtn = document.createElement('button');
+            detailBtn.textContent = '👁️ Xem';
+            detailBtn.title = 'Xem chi tiết';
+            detailBtn.onclick = (e) => {
+                e.stopPropagation();
+                showDetailModal(displayNode, isSpouse ? 'spouse' : 'self');
+            };
+            btnRow.appendChild(detailBtn);
+
+            // Edit Button
+            const editBtn = document.createElement('button');
+            editBtn.textContent = '✏️ Sửa';
+            editBtn.title = 'Chỉnh sửa';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                startEditModal(displayNode, path, isSpouse ? 'spouse' : 'self');
+            };
+            btnRow.appendChild(editBtn);
+
+            if (!isSpouse) {
+                // Add Child Button
+                const addChild = document.createElement('button');
+                addChild.textContent = '👶 Con';
+                addChild.title = 'Thêm con';
+                addChild.onclick = (e) => {
+                    e.stopPropagation();
+                    startAddModal(path, 'child');
+                };
+                btnRow.appendChild(addChild);
+
+                // Add Spouse Button
+                const addSpouse = document.createElement('button');
+                addSpouse.textContent = '💑 Vợ/Chồng';
+                addSpouse.title = 'Thêm vợ/chồng';
+                addSpouse.onclick = (e) => {
+                    e.stopPropagation();
+                    startAddModal(path, 'spouse');
+                };
+                btnRow.appendChild(addSpouse);
+
+                // Add Parent Button
+                const addParent = document.createElement('button');
+                addParent.textContent = '👴 Cha/Mẹ';
+                addParent.title = 'Thêm cha/mẹ';
+                addParent.onclick = (e) => {
+                    e.stopPropagation();
+                    startAddModal(path, 'parent');
+                };
+                btnRow.appendChild(addParent);
+            }
+
+            // Delete Button
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '🗑️';
+            delBtn.title = isSpouse ? 'Xóa vợ/chồng' : 'Xóa';
+            delBtn.className = 'delete';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteNode(path, isSpouse ? 'spouse' : 'self');
+            };
+            btnRow.appendChild(delBtn);
+
+            card.appendChild(btnRow);
+
+            // Click card to view details
+            card.onclick = () => showDetailModal(displayNode, isSpouse ? 'spouse' : 'self');
+
+            return card;
+        }
+
+        function createNodeElement(node, path) {
+            const li = document.createElement('li');
+
+            const row = document.createElement('div');
+            row.className = 'card-row';
+            row.style.position = 'relative';
+
+            // main card
+            const mainCard = createCard(node, path, false);
+            row.appendChild(mainCard);
+
+            // spouse side-by-side with a small connector
+            if (node.spouse) {
+                const hconn = document.createElement('div');
+                hconn.className = 'h-connector';
+                row.appendChild(hconn);
+                const spCard = createCard(node, path, true);  // Pass parent node, isSpouse = true
+                row.appendChild(spCard);
+            }
+
+            li.appendChild(row);
+
+            // vertical connector to children
+            if (node.children && node.children.length > 0) {
+                const v = document.createElement('div');
+                v.className = 'v-connector';
+                li.appendChild(v);
+                const childrenWrap = document.createElement('div');
+                childrenWrap.className = 'children';
+                node.children.forEach((child, idx) => {
+                    const childNode = createNodeElement(child, path.concat(idx));
+                    childrenWrap.appendChild(childNode);
+                });
+                li.appendChild(childrenWrap);
+            }
+
+            return li;
+        }
+
+        function renderTree(tree) {
+            const root = document.getElementById('tree-root');
+            root.innerHTML = '';
+            const ul = document.createElement('ul');
+            ul.className = 'tree';
+            ul.appendChild(createNodeElement(tree, []));
+            root.appendChild(ul);
+        }
+
+        // Draw SVG connectors between parent card bottom-center and child card top-center
+        function drawLines() {
+            const root = document.getElementById('tree-root');
+            if (!root) return;
+
+            // remove existing svg
+            const existing = document.getElementById('tree-svg-lines');
+            if (existing) existing.remove();
+
+            // create svg overlay
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.id = 'tree-svg-lines';
+            svg.style.position = 'absolute';
+            svg.style.top = '0';
+            svg.style.left = '0';
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.pointerEvents = 'none';
+
+            // container rect for coordinate offsets
+            const containerRect = root.getBoundingClientRect();
+
+            // traverse each li that has children
+            const parentLis = root.querySelectorAll('ul.tree li');
+            parentLis.forEach(li => {
+                const childrenWrap = li.querySelector('.children');
+                if (!childrenWrap) return;
+
+                const parentCard = li.querySelector('.card-row .node-card');
+                if (!parentCard) return;
+
+                const pRect = parentCard.getBoundingClientRect();
+                const startX = pRect.left + pRect.width / 2 - containerRect.left;
+                const startY = pRect.bottom - containerRect.top;
+
+                // for each child li
+                const childLis = childrenWrap.querySelectorAll(':scope > li');
+                childLis.forEach(childLi => {
+                    const childCard = childLi.querySelector('.card-row .node-card, .card-row .spouse-card');
+                    if (!childCard) return;
+                    const cRect = childCard.getBoundingClientRect();
+                    const endX = cRect.left + cRect.width / 2 - containerRect.left;
+                    const endY = cRect.top - containerRect.top;
+
+                    const midY = (startY + endY) / 2;
+
+                    // path with vertical-horiz-vertical (smooth elbow)
+                    const path = document.createElementNS(svgNS, 'path');
+                    const d = `M ${startX} ${startY} V ${midY} H ${endX} V ${endY}`;
+                    path.setAttribute('d', d);
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke', '#c49a6c');
+                    path.setAttribute('stroke-width', '3');
+                    path.setAttribute('stroke-linecap', 'round');
+                    path.setAttribute('stroke-linejoin', 'round');
+                    svg.appendChild(path);
+                });
+            });
+
+            root.appendChild(svg);
+        }
+
+        async function deleteNode(path, relation = 'self') {
+            const confirmMsg = relation === 'spouse' ? 'Xóa vợ/chồng?' : 'Xóa thành viên này và tất cả con cái?';
+            if (!confirm(confirmMsg)) return;
+
+            const payload = { path };
+            if (relation && relation !== 'self') payload.relation = relation;
+
+            await fetch('/api/tree/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            loadAndRender();
+        }
+
+        async function loadAndRender() {
+            const tree = await fetchTree();
+            renderTree(tree);
+            // draw connectors after render
+            setTimeout(drawLines, 50);
+            // calculate and display statistics
+            updateStatistics(tree);
+        }
+
+        // Hàm tính toán thống kê gia đình
+        function updateStatistics(node) {
+            let stats = {
+                total: 0,
+                generations: 0,
+                children: 0,
+                spouse: 0,
+                male: 0,
+                female: 0
+            };
+
+            function traverse(n, depth = 1) {
+                if (!n) return;
+
+                stats.total++;
+                stats.generations = Math.max(stats.generations, depth);
+
+                if (n.gender === 'male') stats.male++;
+                if (n.gender === 'female') stats.female++;
+
+                if (n.spouse) {
+                    stats.total++;
+                    stats.spouse++;
+                    if (n.spouse.gender === 'male') stats.male++;
+                    if (n.spouse.gender === 'female') stats.female++;
+                }
+
+                if (n.children && n.children.length > 0) {
+                    stats.children += n.children.length;
+                    n.children.forEach(child => traverse(child, depth + 1));
+                }
+            }
+
+            traverse(node);
+
+            document.getElementById('stat-total').textContent = stats.total;
+            document.getElementById('stat-generations').textContent = stats.generations;
+            document.getElementById('stat-children').textContent = stats.children;
+            document.getElementById('stat-spouse').textContent = stats.spouse;
+            document.getElementById('stat-male').textContent = stats.male;
+            document.getElementById('stat-female').textContent = stats.female;
+        }
+
+        // Search & Filter functions
+        let originalTree = null;
+
+        async function applySearch() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const generationFilter = document.getElementById('filterGeneration').value;
+            
+            if (!searchText && !generationFilter) {
+                loadAndRender();
+                return;
+            }
+
+            const tree = await fetchTree();
+            originalTree = tree;
+
+            function filterNode(node, depth = 1) {
+                const matchesSearch = !searchText || node.name.toLowerCase().includes(searchText);
+                const matchesGen = !generationFilter || depth == generationFilter;
+                
+                if (matchesSearch && matchesGen) {
+                    return {
+                        ...node,
+                        children: node.children ? node.children.map(child => filterNode(child, depth + 1)).filter(c => c) : []
+                    };
+                } else if (!matchesSearch && !matchesGen) {
+                    return null;
+                }
+                
+                if (node.children) {
+                    const filtered = node.children.map(child => filterNode(child, depth + 1)).filter(c => c);
+                    if (filtered.length > 0) {
+                        return { ...node, children: filtered };
+                    }
+                }
+                return null;
+            }
+
+            const filtered = filterNode(tree);
+            if (filtered) {
+                renderTree(filtered);
+                setTimeout(drawLines, 50);
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterGeneration').value = '';
+            loadAndRender();
+        }
+
+        // Zoom & Pan
+        let zoomLevel = 1;
+        let panX = 0;
+        let panY = 0;
+
+        document.addEventListener('wheel', (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                const root = document.getElementById('tree-root');
+                zoomLevel += e.deltaY > 0 ? -0.1 : 0.1;
+                zoomLevel = Math.max(0.5, Math.min(2, zoomLevel));
+                root.style.transform = `scale(${zoomLevel}) translate(${panX}px, ${panY}px)`;
+            }
+        }, { passive: false });
+
+        // Collapse/Expand feature
+        let collapsedBranches = new Set();
+
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('node-card')) {
+                const childrenWrap = e.target.closest('li')?.querySelector('.children');
+                if (childrenWrap) {
+                    const id = e.target.closest('li').dataset.nodeId;
+                    if (collapsedBranches.has(id)) {
+                        collapsedBranches.delete(id);
+                        childrenWrap.style.display = 'flex';
+                    } else {
+                        collapsedBranches.add(id);
+                        childrenWrap.style.display = 'none';
+                    }
+                    drawLines();
+                }
+            }
+        });
+
+        loadAndRender();
+
+        // redraw lines on resize
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                drawLines();
+            }, 120);
+        });
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(modal => {
+                if (e.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
