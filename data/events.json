@@ -12,22 +12,5 @@
     "description": "",
     "notes": "",
     "remind": ""
-  },
-  {
-    "id": 1763477644252,
-    "title": "đam cưới Hóa Và Hùng",
-    "type": "wedding",
-    "importance": "high",
-    "date": "2025-11-19",
-    "time": "",
-    "place": "trường ĐH Khoa Học Huế",
-    "mainMember": [
-      1,
-      1
-    ],
-    "participants": [],
-    "description": "đám cưới linh đình",
-    "notes": "5 cây vàng",
-    "remind": "1d"
   }
 ]

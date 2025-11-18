@@ -1,110 +1,46 @@
+<!-- Partial: auth-modal.ejs -->
+<!-- Includes both login and register modals -->
 <div id="loginModal" class="modal-overlay">
-    <div class="modal-content" style="
-        background: white;
-        width: 400px;
-        max-width: 90%;
-        padding: 40px; /* Tạo khoảng trắng đều 4 phía */
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        position: relative;
-        text-align: center;
-        margin: auto;
-        box-sizing: border-box; /* Quan trọng: Giữ kích thước không bị vỡ */
-    ">
-        <span class="modal-close" onclick="document.getElementById('loginModal').style.display='none'" 
-              style="position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer;">&times;</span>
-        
-        <div class="brand-inline" style="margin-bottom: 20px;">
-            <div class="brand-text" style="font-size: 24px; font-weight: bold; color: #333;">Cây Gia Phả</div>
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+        <div class="brand-inline">
+            <img src="/images/logo_caygiapha.jpg" alt="Logo" class="logo-img">
+            <div class="brand-text">Cây Gia Phả</div>
         </div>
-        
-        <h1 style="margin-bottom: 20px; font-size: 22px;">Đăng Nhập</h1>
-        
-        <form action="/login" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="email" name="email" placeholder="Email" required 
-                   style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
-            
-            <input type="password" name="password" placeholder="Mật khẩu" required 
-                   style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
-            
-            <div class="checkbox-container" style="text-align: left; display: flex; align-items: center;">
-                <input type="checkbox" id="remember" name="remember" style="width: auto; margin-right: 8px;">
+        <h1>Đăng Nhập</h1>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+            <div class="checkbox-container">
+                <input type="checkbox" id="remember" name="remember">
                 <label for="remember">Ghi nhớ đăng nhập</label>
             </div>
-            
-            <button type="submit" style="
-                background-color: #007bff; color: white; padding: 12px; border: none; 
-                border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%;">
-                Đăng Nhập
-            </button>
+            <button type="submit">Đăng Nhập</button>
         </form>
-
-        <p style="margin-top: 15px; font-size: 14px;">
-            Chưa có tài khoản? 
-            <a href="#" onclick="document.getElementById('loginModal').style.display='none'; document.getElementById('registerModal').style.display='flex'" style="color: #007bff;">Đăng ký ngay</a>
-        </p>
+        <p style="text-align: right;"><a href="#" onclick="forgotPassword()">Quên mật khẩu?</a></p>
+        <p>Chưa có tài khoản? <a href="#" onclick="showModal('registerModal'); closeModal('loginModal')">Đăng ký ngay</a></p>
     </div>
 </div>
 
 <div id="registerModal" class="modal-overlay">
-    <div class="modal-content" style="
-        background: white;
-        width: 400px;
-        max-width: 90%;
-        padding: 40px; /* Padding 40px giúp cân bằng khoảng trắng trái phải */
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        position: relative;
-        text-align: center;
-        margin: auto;
-        box-sizing: border-box;
-    ">
-        <span class="modal-close" onclick="document.getElementById('registerModal').style.display='none'" 
-              style="position: absolute; right: 20px; top: 15px; font-size: 30px; cursor: pointer;">&times;</span>
-        
-        <div class="brand-inline" style="margin-bottom: 20px;">
-            <div class="brand-text" style="font-size: 24px; font-weight: bold; color: #333;">Cây Gia Phả</div>
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('registerModal')">&times;</button>
+        <div class="brand-inline">
+            <img src="/images/logo_caygiapha.jpg" alt="Logo" class="logo-img">
+            <div class="brand-text">Cây Gia Phả</div>
         </div>
-        
-        <h1 style="margin-bottom: 20px; font-size: 22px;">Đăng Ký</h1>
-
-        <form action="/register" method="POST" style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="text" name="name" placeholder="Họ và tên" required 
-                   style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
-            
-            <input type="email" name="email" placeholder="Email" required 
-                   style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
-            
-            <input type="password" name="password" placeholder="Mật khẩu" required 
-                   style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
-            
-            <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required 
-                   style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box;">
-            
-            <div class="checkbox-container" style="text-align: left; display: flex; align-items: center; font-size: 13px;">
-                <input type="checkbox" id="terms" name="terms" required style="width: auto; margin-right: 8px;">
-                <label for="terms">Tôi đồng ý với <a href="#" style="color: #007bff;">Điều khoản sử dụng</a></label>
+        <h1>Đăng Ký</h1>
+        <form id="registerForm" onsubmit="handleRegister(event)">
+            <input type="text" name="name" placeholder="Họ và tên" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mật khẩu" required>
+            <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+            <div class="checkbox-container">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a></label>
             </div>
-            
-            <button type="submit" style="
-                background-color: #007bff; color: white; padding: 12px; border: none; 
-                border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%;">
-                Đăng Ký
-            </button>
+            <button type="submit">Đăng Ký</button>
         </form>
-
-        <p style="margin-top: 15px; font-size: 14px;">
-            Đã có tài khoản? 
-            <a href="#" onclick="document.getElementById('registerModal').style.display='none'; document.getElementById('loginModal').style.display='flex'" style="color: #007bff;">Đăng nhập</a>
-        </p>
+        <p>Đã có tài khoản? <a href="#" onclick="showModal('loginModal'); closeModal('registerModal')">Đăng nhập</a></p>
     </div>
 </div>
-
-<script>
-    // Logic đóng modal khi click ra ngoài vùng trắng
-    window.onclick = function(event) {
-        if (event.target.classList.contains('modal-overlay')) {
-            event.target.style.display = "none";
-        }
-    }
-</script>

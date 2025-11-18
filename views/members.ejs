@@ -7,371 +7,249 @@
   <style>
     body{font-family:Arial,Helvetica,sans-serif;padding:20px;background:#f7f9fb}
     .panel{background:#fff;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
     label{font-size:13px;color:#333}
     input,select,textarea{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px}
-    .btn{padding:10px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;margin-right:4px}
-    .btn-primary{background:#16a34a;color:#fff}
-    .btn-muted{background:#e5e7eb;color:#333}
-    .btn-primary:hover{background:#15803d}
-    .btn-muted:hover{background:#d1d5db}
-    .search-row{display:flex;gap:12px;align-items:end;margin-bottom:16px}
-    .search-row>div{flex:1}
-    .search-row .w-auto{flex:0}
-    .results-table{width:100%;border-collapse:collapse}
-    .results-table thead{background:#f3f4f6}
-    .results-table th{padding:10px;text-align:left;border-bottom:2px solid #ddd;cursor:pointer;user-select:none;font-weight:600}
-    .results-table th:hover{background:#e5e7eb}
-    .results-table td{padding:10px;border-bottom:1px solid #eef2f7}
-    .results-table tr:hover{background:#fafafa}
-    .avatar-cell{display:flex;align-items:center;gap:10px}
-    .avatar-img{width:40px;height:40px;border-radius:50%;background:#d1d5db;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;background-size:cover;background-position:center;flex-shrink:0}
-    .member-name{font-weight:500}
-    .actions{display:flex;gap:6px;justify-content:center}
-    .action-link{color:#2563eb;cursor:pointer;font-size:13px;padding:2px 6px}
-    .action-link:hover{text-decoration:underline;background:#eff6ff;border-radius:3px}
-    .action-link.delete{color:#dc2626}
-    .no-results{color:#999;padding:20px;text-align:center}
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:1000}
-    .modal .dialog{background:#fff;padding:20px;border-radius:10px;width:720px;max-height:85vh;overflow-y:auto}
+    .btn{padding:10px 14px;border-radius:6px;border:none;cursor:pointer}
+  .btn-primary{background:#16a34a;color:#fff}
+  .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .card{background:#fff;padding:12px;border-radius:8px;border:1px solid #eef2f7}
+    .card h4{margin:0 0 6px}
+    .card .meta{font-size:12px;color:#666}
+    .actions{display:flex;gap:8px;margin-top:8px}
+    .action-link{color:#2563eb;cursor:pointer}
+    /* modal simple */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)}
+    .modal .dialog{background:#fff;padding:16px;border-radius:10px;width:720px}
     .modal.show{display:flex}
-    .modal h3{margin-top:0}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .form-grid>div.full{grid-column:1/3}
-    .form-group{display:flex;flex-direction:column}
-    .form-group label{margin-bottom:6px}
-    .modal-buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-    .modal-buttons button{padding:8px 16px}
   </style>
 </head>
 <body>
-  <h2>Quản lý thành viên gia phả</h2>
+  <h2>Quản lý thành viên</h2>
   <div class="panel">
-    <div class="search-row">
-      <div>
+    <div style="display:flex;gap:12px;align-items:end;">
+      <div style="flex:1">
         <label>Tên thành viên</label>
         <input id="q-name" placeholder="Nhập tên cần tìm" />
       </div>
-      <div class="w-auto" style="width:120px">
+      <div style="width:120px">
         <label>Thế hệ</label>
-        <select id="q-gen"><option value="">Tất cả</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+        <select id="q-gen"><option value="">Tất cả</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
       </div>
-      <div class="w-auto" style="width:120px">
+      <div style="width:140px">
         <label>Giới tính</label>
-        <select id="q-gender"><option value="">Tất cả</option><option value="male">Nam</option><option value="female">Nữ</option></select>
+        <select id="q-gender"><option value="">Tất cả</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
       </div>
-      <div class="w-auto" style="width:140px">
-        <label>Sắp xếp</label>
-        <select id="sort-by" onchange="changeSortOrder()"><option value="name">Tên (A-Z)</option><option value="generation-asc">Thế hệ ↑</option><option value="generation-desc">Thế hệ ↓</option><option value="years">Năm sinh ↑</option><option value="children">Con ↓</option></select>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" id="btn-search">Tìm kiếm</button>
+        <button class="btn btn-muted" id="btn-reset">Đặt lại</button>
       </div>
-      <div class="w-auto">
-        <button class="btn btn-primary" id="btn-search">🔍 Tìm</button>
-        <button class="btn btn-muted" id="btn-reset">↺ Xóa</button>
-      </div>
-      <div class="w-auto" style="margin-left:auto">
-        <button class="btn btn-primary" id="btn-add">+ Thêm</button>
+      <div style="margin-left:auto">
+        <button class="btn btn-primary" id="btn-add">Thêm thành viên mới</button>
       </div>
     </div>
 
-    <table class="results-table" id="results-table" style="display:none">
-      <thead>
-        <tr>
-          <th onclick="sortTable('name')">👤 Tên</th>
-          <th onclick="sortTable('generation')">Thế hệ</th>
-          <th onclick="sortTable('years')">Năm sinh/mất</th>
-          <th>Giới tính</th>
-          <th onclick="sortTable('children')">Con</th>
-          <th style="text-align:center;width:150px">Hành động</th>
-        </tr>
-      </thead>
-      <tbody id="results"></tbody>
-    </table>
-    <div id="no-results" class="no-results">Không có kết quả</div>
+    <div id="results" class="result-grid"></div>
+
   </div>
 
-  <!-- Add/Edit Modal -->
+  <!-- add/edit modal -->
   <div id="modal" class="modal">
     <div class="dialog">
       <h3 id="modal-title">Thêm thành viên mới</h3>
-      <div class="form-grid">
-        <div class="form-group">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
           <label>Họ và tên *</label>
-          <input id="m-name" required />
+          <input id="m-name" />
         </div>
-        <div class="form-group">
+        <div>
           <label>Giới tính</label>
-          <select id="m-gender"><option value="">Chọn...</option><option value="male">Nam</option><option value="female">Nữ</option></select>
+          <select id="m-gender"><option value="">Chọn</option><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select>
         </div>
-        <div class="form-group">
-          <label>Năm sinh</label>
-          <input id="m-dob" type="number" min="1900" max="2099" placeholder="VD: 1980" />
+        <div>
+          <label>Ngày sinh</label>
+          <input id="m-dob" type="date" />
         </div>
-        <div class="form-group">
-          <label>Năm mất</label>
-          <input id="m-deathYear" type="number" min="1900" max="2099" placeholder="Để trống nếu chưa" />
+        <div>
+          <label>Nơi sinh</label>
+          <input id="m-bp" />
         </div>
-        <div class="form-group full">
-          <label>Mô tả</label>
-          <textarea id="m-description" placeholder="Thông tin thêm..." style="min-height:60px"></textarea>
+        <div>
+          <label>Cha (chọn)</label>
+          <select id="m-father"><option value="">Chọn cha</option></select>
         </div>
-        <div class="form-group full">
-          <label>Ảnh đại diện</label>
-          <input type="file" id="m-image" accept="image/*" />
-          <small style="color:#666;margin-top:4px;display:block">Chọn file ảnh hoặc để trống</small>
+        <div>
+          <label>Mẹ (chọn)</label>
+          <select id="m-mother"><option value="">Chọn mẹ</option></select>
+        </div>
+        <div style="grid-column:1/3">
+          <label>Nghề nghiệp</label>
+          <input id="m-job" />
+        </div>
+        <div style="grid-column:1/3">
+          <label>Ghi chú</label>
+          <textarea id="m-notes"></textarea>
         </div>
       </div>
-      <div class="modal-buttons">
-        <button class="btn btn-muted" id="modal-cancel">Hủy</button>
-        <button class="btn btn-primary" id="modal-save">Thêm</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete Confirm Modal -->
-  <div id="modal-del" class="modal">
-    <div class="dialog" style="width:400px">
-      <h3>Xác nhận xóa</h3>
-      <p>Bạn có chắc muốn xóa <strong id="del-name"></strong> và tất cả con cái?</p>
-      <div class="modal-buttons">
-        <button class="btn btn-muted" id="del-cancel">Hủy</button>
-        <button class="btn btn-primary" style="background:#dc2626" id="del-confirm">Xóa</button>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button class="btn btn-muted" id="modal-cancel">Hủy bỏ</button>
+        <button class="btn btn-primary" id="modal-save">Thêm thành viên</button>
       </div>
     </div>
   </div>
 
-  <!-- Detail Modal -->
+  <!-- delete confirm modal -->
+  <div id="modal-del" class="modal"><div class="dialog"><h3>Xác nhận xóa</h3><div id="del-body"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="btn btn-muted" id="del-cancel">Hủy</button><button class="btn btn-primary" id="del-confirm">Xác nhận xóa</button></div></div></div>
+
+  <!-- member detail modal -->
   <div id="modal-detail" class="modal">
-    <div class="dialog" style="width:600px">
-      <h3 id="detail-title">Thông tin chi tiết</h3>
-      <div id="detail-body"></div>
-      <div class="modal-buttons">
-        <button class="btn btn-muted" onclick="closeModal('modal-detail')">Đóng</button>
+    <div class="dialog" style="width:820px;max-width:95vw">
+      <h3>Thông tin chi tiết thành viên <span id="detail-name"></span></h3>
+      <div id="detail-body" style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:0 0 200px;text-align:center">
+          <div style="width:140px;height:140px;border-radius:50%;background:#eef2f7;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:48px">👤</div>
+          <div id="detail-id" style="margin-top:8px;color:#666"></div>
+          <div style="margin-top:10px"><button class="btn btn-primary" id="detail-edit">Chỉnh sửa</button> <button class="btn" id="detail-delete" style="background:#ff4d4f;color:#fff">Xóa</button></div>
+        </div>
+        <div style="flex:1">
+          <div id="detail-personal" style="background:#fafafa;padding:12px;border-radius:8px;margin-bottom:8px"></div>
+          <div id="detail-family" style="background:#fafafa;padding:12px;border-radius:8px"></div>
+        </div>
       </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button class="btn btn-muted" onclick="document.getElementById('modal-detail').classList.remove('show')">Đóng</button></div>
     </div>
   </div>
 
   <script>
     let members = [];
-    let editing = null;
-    let sortKey = 'name';
-    let sortOrder = 'asc'; // 'asc' or 'desc'
+    let editing = null; // { path, relation }
 
-    function getInitials(name){ return name ? name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'A'; }
-
-    function changeSortOrder(){
-      const sel = document.getElementById('sort-by').value;
-      if(sel === 'name') { sortKey = 'name'; sortOrder = 'asc'; }
-      else if(sel === 'generation-asc') { sortKey = 'generation'; sortOrder = 'asc'; }
-      else if(sel === 'generation-desc') { sortKey = 'generation'; sortOrder = 'desc'; }
-      else if(sel === 'years') { sortKey = 'years'; sortOrder = 'asc'; }
-      else if(sel === 'children') { sortKey = 'children'; sortOrder = 'desc'; }
-      sortMembers(sortKey, sortOrder);
-      renderResults(members);
-    }
-
+    // Load the flat list from API
     async function loadMembers(){
       const res = await fetch('/api/members/list');
-      if(!res.ok) return alert('Lỗi tải dữ liệu');
+      if(!res.ok) return alert('Lỗi tải dữ liệu thành viên');
       members = await res.json();
-      sortMembers(sortKey, sortOrder);
       renderResults(members);
-    }
-
-    function sortMembers(key, order = 'asc'){
-      sortKey = key;
-      sortOrder = order;
-      members.sort((a, b) => {
-        let cmp = 0;
-        if(key === 'name') cmp = (a.name || '').localeCompare(b.name || '');
-        else if(key === 'generation') cmp = (a.generation || 0) - (b.generation || 0);
-        else if(key === 'children') cmp = (a.childrenCount || 0) - (b.childrenCount || 0);
-        else if(key === 'years') {
-          const aYear = a.node && a.node.birthYear ? a.node.birthYear : 9999;
-          const bYear = b.node && b.node.birthYear ? b.node.birthYear : 9999;
-          cmp = aYear - bYear;
-        }
-        return order === 'desc' ? -cmp : cmp;
-      });
-    }
-
-    function sortTable(key){ sortMembers(key, 'asc'); renderResults(members); }
-
-    function getImageUrl(node){
-      if(!node || !node.image) return null;
-      if(node.image.startsWith('/images/uploads/') || node.image.startsWith('http')) return node.image;
-      return '/images/uploads/' + node.image;
+      populateParentSelects(members);
     }
 
     function renderResults(list){
-      const tbody = document.getElementById('results');
-      const noResults = document.getElementById('no-results');
-      const table = document.getElementById('results-table');
-      tbody.innerHTML='';
-      if(!list || !list.length){ table.style.display='none'; noResults.style.display='block'; return; }
-      table.style.display='table'; noResults.style.display='none';
+      const el = document.getElementById('results'); el.innerHTML='';
+      if(!list || !list.length){ el.innerHTML='<div style="grid-column:1/4;color:#666;padding:12px">Không có kết quả</div>'; return; }
       list.forEach(m=>{
-        const tr = document.createElement('tr');
-        const imgUrl = getImageUrl(m.node);
-        const initials = getInitials(m.name);
-        const td1 = document.createElement('td');
-        td1.innerHTML = `<div class="avatar-cell"><div class="avatar-img" ${imgUrl ? `style="background-image:url('${imgUrl}');color:transparent"` : `style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"`}>${!imgUrl ? initials : ''}</div><div class="member-name">${m.name || '(chưa đặt tên)'}</div></div>`;
-        tr.appendChild(td1);
-        const td2 = document.createElement('td'); td2.textContent = m.generation || '-'; tr.appendChild(td2);
-        const td3 = document.createElement('td');
-        let yearText = '';
-        if(m.node) {
-          if(m.node.birthYear && m.node.deathYear) yearText = `${m.node.birthYear} - ${m.node.deathYear}`;
-          else if(m.node.birthYear) yearText = `Sinh: ${m.node.birthYear}`;
-        }
-        td3.textContent = yearText || '-'; tr.appendChild(td3);
-        const td4 = document.createElement('td'); td4.textContent = m.node && m.node.gender ? (m.node.gender === 'male' ? 'Nam' : 'Nữ') : '-'; tr.appendChild(td4);
-        const td5 = document.createElement('td'); td5.textContent = m.childrenCount || 0; tr.appendChild(td5);
-        const td6 = document.createElement('td'); td6.style.textAlign='center';
-        const detailBtn = document.createElement('span'); detailBtn.className='action-link'; detailBtn.textContent='Chi tiết'; detailBtn.onclick=()=>openDetail(m.path);
-        const editBtn = document.createElement('span'); editBtn.className='action-link'; editBtn.textContent='Sửa'; editBtn.onclick=()=>openEditModal(m.path);
-        const delBtn = document.createElement('span'); delBtn.className='action-link delete'; delBtn.textContent='Xóa'; delBtn.onclick=()=>openDelete(m.path, m.name);
-        td6.appendChild(detailBtn); td6.appendChild(editBtn); td6.appendChild(delBtn);
-        tr.appendChild(td6);
-        tbody.appendChild(tr);
+        const c = document.createElement('div'); c.className='card';
+        const h = document.createElement('h4'); h.textContent = m.name || '(không tên)'; c.appendChild(h);
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `Thế hệ ${m.generation} · Con: ${m.childrenCount || 0}`; c.appendChild(meta);
+        const actions = document.createElement('div'); actions.className='actions';
+  const view = document.createElement('span'); view.className='action-link'; view.textContent='Xem'; view.onclick=()=> openInTree(m.path);
+  const detail = document.createElement('span'); detail.className='action-link'; detail.textContent='Chi tiết'; detail.onclick = () => openDetail(m.path);
+        const edit = document.createElement('span'); edit.className='action-link'; edit.textContent='Sửa'; edit.onclick=()=> openEditModal(m.path);
+        const del = document.createElement('span'); del.className='action-link'; del.style.color='red'; del.textContent='Xóa'; del.onclick=()=> openDelete(m.path);
+  actions.appendChild(view); actions.appendChild(detail); actions.appendChild(edit); actions.appendChild(del);
+        c.appendChild(actions);
+        el.appendChild(c);
       });
     }
 
-    function openModal(id){ document.getElementById(id).classList.add('show'); }
-    function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+    function populateParentSelects(list){
+      const father = document.getElementById('m-father'); const mother = document.getElementById('m-mother');
+      father.innerHTML='<option value="">Chọn cha</option>'; mother.innerHTML='<option value="">Chọn mẹ</option>';
+      list.forEach((m)=>{
+        const opt = document.createElement('option'); opt.value = JSON.stringify(m.path); opt.textContent = m.name + ' (Thế hệ ' + m.generation + ')';
+        father.appendChild(opt.cloneNode(true)); mother.appendChild(opt.cloneNode(true));
+      });
+    }
+
+    function openInTree(path){
+      // attempt to open /tree and highlight via query param if implemented later
+      const q = path && path.length? 'path='+encodeURIComponent(JSON.stringify(path)) : '';
+      window.open('/tree'+(q?('?'+q):''), '_blank');
+    }
 
     async function openEditModal(path){
-      editing = { path };
+      editing = { path, relation: 'self' };
+      // find node in members list
       const m = members.find(x=> JSON.stringify(x.path) === JSON.stringify(path));
-      document.getElementById('modal-title').textContent = 'Chỉnh sửa thành viên';
-      document.getElementById('modal-save').textContent = 'Cập nhật';
+      document.getElementById('modal-title').textContent='Chỉnh sửa thành viên';
+      document.getElementById('modal-save').textContent='Cập nhật thông tin';
       if(m && m.node){
         document.getElementById('m-name').value = m.node.name || '';
         document.getElementById('m-gender').value = m.node.gender || '';
-        document.getElementById('m-dob').value = m.node.birthYear || '';
-        document.getElementById('m-deathYear').value = m.node.deathYear || '';
-        document.getElementById('m-description').value = m.node.description || '';
+        document.getElementById('m-dob').value = m.node.dob || '';
+        document.getElementById('m-bp').value = m.node.birthplace || '';
+        document.getElementById('m-job').value = m.node.occupation || '';
+        document.getElementById('m-notes').value = m.node.notes || '';
       } else {
         document.getElementById('m-name').value = '';
         document.getElementById('m-gender').value = '';
         document.getElementById('m-dob').value = '';
-        document.getElementById('m-deathYear').value = '';
-        document.getElementById('m-description').value = '';
+        document.getElementById('m-bp').value = '';
+        document.getElementById('m-job').value = '';
+        document.getElementById('m-notes').value = '';
       }
-      document.getElementById('m-image').value = '';
-      openModal('modal');
+      // try to preselect parent if possible (not strictly accurate for spouse case)
+      document.getElementById('m-father').value = '';
+      document.getElementById('m-mother').value = '';
+      document.getElementById('modal').classList.add('show');
     }
 
-    function openAddModal(){
-      editing = null;
-      document.getElementById('modal-title').textContent = 'Thêm thành viên mới';
-      document.getElementById('modal-save').textContent = 'Thêm';
-      document.getElementById('m-name').value = '';
-      document.getElementById('m-gender').value = '';
-      document.getElementById('m-dob').value = '';
-      document.getElementById('m-deathYear').value = '';
-      document.getElementById('m-description').value = '';
-      document.getElementById('m-image').value = '';
-      openModal('modal');
+    function openAddModal(){ editing = null; document.getElementById('modal-title').textContent='Thêm thành viên mới'; document.getElementById('modal-save').textContent='Thêm thành viên'; document.getElementById('m-name').value=''; document.getElementById('m-gender').value=''; document.getElementById('m-dob').value=''; document.getElementById('m-bp').value=''; document.getElementById('m-job').value=''; document.getElementById('m-notes').value=''; document.getElementById('m-father').value=''; document.getElementById('m-mother').value=''; document.getElementById('modal').classList.add('show'); }
+
+    function openDelete(path){ document.getElementById('del-body').innerHTML='<p>Bạn có chắc muốn xóa thành viên?</p>'; document.getElementById('modal-del').classList.add('show'); document.getElementById('del-confirm').onclick = ()=> doDelete(path); }
+
+    async function doDelete(path){
+      const res = await fetch('/api/members', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ path }) });
+      if(!res.ok) return alert('Xóa thất bại');
+      document.getElementById('modal-del').classList.remove('show'); await loadMembers();
     }
 
     async function openDetail(path){
       const params = new URLSearchParams(); params.set('path', JSON.stringify(path));
       const res = await fetch('/api/members/detail?'+params.toString());
-      if(!res.ok) return alert('Lỗi tải chi tiết');
+      if(!res.ok) return alert('Không thể tải chi tiết');
       const d = await res.json();
-      const imgUrl = getImageUrl(d.node);
-      document.getElementById('detail-title').textContent = d.node.name || 'Thông tin';
-      let html = `<div style="display:flex;gap:16px"><div style="flex:0 0 120px;text-align:center">
-        <div style="width:120px;height:120px;border-radius:50%;background:${imgUrl?'none':'linear-gradient(135deg,#667eea,#764ba2)'};${imgUrl?'background-image:url('+imgUrl+');background-size:cover;background-position:center':''}margin:0 auto;border:3px solid #ddd"></div>
-      </div><div style="flex:1"><strong>Thông tin cá nhân</strong><div>Họ và tên: ${d.node.name||''}</div><div>Giới tính: ${d.node.gender ? (d.node.gender==='male'?'Nam':'Nữ') : '-'}</div>`;
-      if(d.node.birthYear) html += `<div>Năm sinh: ${d.node.birthYear}</div>`;
-      if(d.node.deathYear) html += `<div>Năm mất: ${d.node.deathYear}</div>`;
-      if(d.node.description) html += `<div style="margin-top:8px;font-size:13px;color:#666">${d.node.description}</div>`;
-      html += '<div style="margin-top:12px"><strong>Gia đình</strong>';
-      if(d.parent) html += `<div>Cha/Mẹ: ${d.parent.name}</div>`;
-      if(d.spouse) html += `<div>Vợ/Chồng: ${d.spouse.name}</div>`;
-      if(d.children && d.children.length) html += `<div>Con cái: ${d.children.map(c=>c.name).join(', ')}</div>`;
-      html += '</div></div></div>';
-      document.getElementById('detail-body').innerHTML = html;
-      openModal('modal-detail');
-    }
+      document.getElementById('detail-name').textContent = d.node.name || '';
+      document.getElementById('detail-id').textContent = d.node.id ? ('ID: '+d.node.id) : '';
+      document.getElementById('detail-personal').innerHTML = `<strong>Thông tin cá nhân</strong><div>Họ và tên: ${d.node.name||''}</div><div>Ngày sinh: ${d.node.dob||''}</div><div>Nơi sinh: ${d.node.birthplace||''}</div><div>Nghề nghiệp: ${d.node.occupation||''}</div>`;
+      let familyHtml = '<strong>Quan hệ gia đình</strong>';
+      if(d.parent) familyHtml += `<div>Cha/Mẹ: ${d.parent.name} <button class="action-link" onclick="openDetail(${JSON.stringify(d.parent.path)})">Xem</button></div>`;
+      if(d.spouse) familyHtml += `<div>Vợ/Chồng: ${d.spouse.name}</div>`;
+      if(d.children && d.children.length) {
+        familyHtml += '<div>Con cái:</div><ul>' + d.children.map(c=>`<li>${c.name} <button class="action-link" onclick='openDetail(${JSON.stringify(c.path)})'>Xem</button></li>`).join('') + '</ul>';
+      }
+      document.getElementById('detail-family').innerHTML = familyHtml;
+      document.getElementById('modal-detail').classList.add('show');
 
-    function openDelete(path, name){
-      document.getElementById('del-name').textContent = name;
-      document.getElementById('del-confirm').onclick = ()=>doDelete(path);
-      openModal('modal-del');
-    }
-
-    async function doDelete(path){
-      const res = await fetch('/api/members', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ path }) });
-      if(!res.ok) return alert('Xóa thất bại');
-      closeModal('modal-del');
-      await loadMembers();
+      document.getElementById('detail-edit').onclick = ()=>{ document.getElementById('modal-detail').classList.remove('show'); openEditModal(d.path); };
+      document.getElementById('detail-delete').onclick = ()=>{ document.getElementById('modal-detail').classList.remove('show'); openDelete(d.path); };
     }
 
     document.getElementById('btn-add').onclick = openAddModal;
-    document.getElementById('modal-cancel').onclick = ()=>closeModal('modal');
-    document.getElementById('del-cancel').onclick = ()=>closeModal('modal-del');
+    document.getElementById('modal-cancel').onclick = ()=> document.getElementById('modal').classList.remove('show');
+    document.getElementById('del-cancel').onclick = ()=> document.getElementById('modal-del').classList.remove('show');
 
     document.getElementById('modal-save').onclick = async ()=>{
-      const name = document.getElementById('m-name').value.trim();
-      if(!name) return alert('Vui lòng nhập tên');
-      const birthYear = document.getElementById('m-dob').value ? parseInt(document.getElementById('m-dob').value) : null;
-      const deathYear = document.getElementById('m-deathYear').value ? parseInt(document.getElementById('m-deathYear').value) : null;
-      let image = null;
-      const fileInput = document.getElementById('m-image');
-      if(fileInput && fileInput.files && fileInput.files[0]){
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = async (e)=>{
-          const dataUrl = e.target.result;
-          try{
-            const uploadRes = await fetch('/api/tree/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({dataUrl}) });
-            const uploadJson = await uploadRes.json();
-            if(uploadRes.ok && uploadJson.filename) image = uploadJson.filename;
-            else if(uploadRes.ok && uploadJson.url) image = uploadJson.url.split('/').pop();
-            saveOrUpdate(name, birthYear, deathYear, image);
-          } catch(err){ console.error(err); saveOrUpdate(name, birthYear, deathYear, image); }
-        };
-        reader.readAsDataURL(file);
+      const payload = { name: document.getElementById('m-name').value, gender: document.getElementById('m-gender').value, dob: document.getElementById('m-dob').value, birthplace: document.getElementById('m-bp').value, occupation: document.getElementById('m-job').value, notes: document.getElementById('m-notes').value };
+      const parentSel = document.getElementById('m-father').value || document.getElementById('m-mother').value || '';
+      const parentPath = parentSel ? JSON.parse(parentSel) : [];
+      if(editing){
+        const res = await fetch('/api/members', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ path: editing.path, updates: payload }) });
+        if(!res.ok) return alert('Cập nhật thất bại');
       } else {
-        saveOrUpdate(name, birthYear, deathYear, image);
+        const res = await fetch('/api/members', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(Object.assign({}, payload, { parentPath })) });
+        if(!res.ok) return alert('Thêm thất bại');
       }
-      async function saveOrUpdate(nm, by, dy, img){
-        const payload = { name: nm, gender: document.getElementById('m-gender').value || null, birthYear: by, deathYear: dy, description: document.getElementById('m-description').value };
-        if(img) payload.image = img;
-        if(editing){
-          const res = await fetch('/api/members', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ path: editing.path, updates: payload }) });
-          if(!res.ok) return alert('Cập nhật thất bại');
-        } else {
-          const res = await fetch('/api/members', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(Object.assign({}, payload, { parentPath: [] })) });
-          if(!res.ok) return alert('Thêm thất bại');
-        }
-        closeModal('modal'); await loadMembers();
-      }
+      document.getElementById('modal').classList.remove('show'); await loadMembers();
     };
 
     document.getElementById('btn-search').onclick = async ()=>{
-      const q = document.getElementById('q-name').value;
-      const gen = document.getElementById('q-gen').value;
-      const gender = document.getElementById('q-gender').value;
-      const params = new URLSearchParams();
-      if(q) params.set('name', q);
-      if(gen) params.set('gen', gen);
-      if(gender) params.set('gender', gender);
-      const res = await fetch('/api/members/search?'+params.toString());
-      if(!res.ok) return alert('Lỗi tìm kiếm');
-      const data = await res.json();
-      members = data.map(d=>({ name: d.name, generation: d.generation, childrenCount: (d.node && d.node.children)?d.node.children.length:0, path: d.path, node: d.node }));
-      sortMembers(sortKey, sortOrder);
-      renderResults(members);
+      const q = document.getElementById('q-name').value; const gen = document.getElementById('q-gen').value; const gender = document.getElementById('q-gender').value;
+      const params = new URLSearchParams(); if(q) params.set('name', q); if(gen) params.set('gen', gen); if(gender) params.set('gender', gender);
+      const res = await fetch('/api/members/search?'+params.toString()); if(!res.ok) return alert('Lỗi tìm kiếm'); const data = await res.json(); renderResults(data.map(d=>({ name: d.name, generation: d.generation, childrenCount: (d.node && d.node.children)?d.node.children.length:0, path: d.path, node: d.node })));
     };
 
-    document.getElementById('btn-reset').onclick = ()=>{ 
-      document.getElementById('q-name').value=''; 
-      document.getElementById('q-gen').value=''; 
-      document.getElementById('q-gender').value=''; 
-      loadMembers(); 
-    };
+    document.getElementById('btn-reset').onclick = ()=>{ document.getElementById('q-name').value=''; document.getElementById('q-gen').value=''; document.getElementById('q-gender').value=''; loadMembers(); };
 
     loadMembers();
   </script>

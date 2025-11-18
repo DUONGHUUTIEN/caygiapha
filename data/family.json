@@ -6,22 +6,15 @@
       "children": [
         {
           "name": "Alice Doe",
-          "children": [],
-          "gender": null,
-          "birthYear": null,
-          "deathYear": null,
-          "description": "",
-          "image": "img_1763476724750.png"
+          "children": []
         },
         {
           "name": "Bob Doe",
           "children": []
         }
       ],
-      "gender": "male",
       "spouse": {
-        "name": "thao",
-        "gender": "female"
+        "name": "vo john"
       }
     },
     {
@@ -49,7 +42,5 @@
       "name": "hung",
       "children": []
     }
-  ],
-  "image": "/images/uploads/img_1763476930223.jpg",
-  "gender": "male"
+  ]
 }
